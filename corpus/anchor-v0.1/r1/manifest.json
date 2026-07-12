@@ -1,0 +1,53 @@
+{
+  "artifact": "css-ledger-anchor",
+  "spec_version": "0.1",
+  "revision": 1,
+  "keys": {
+    "anchor-vector-1": "../../keys/vector.pub.pem"
+  },
+  "cases": [
+    {
+      "name": "golden",
+      "log": "chain.jsonl",
+      "ledger": "ledger.json",
+      "expect": "pass"
+    },
+    {
+      "name": "linkage-broken",
+      "log": "linkage-broken.jsonl",
+      "ledger": "ledger.json",
+      "expect": "fail",
+      "failing_check": "chain_linkage"
+    },
+    {
+      "name": "sequence-wrong",
+      "log": "sequence-wrong.jsonl",
+      "ledger": "ledger.json",
+      "expect": "fail",
+      "failing_check": "chain_structure"
+    },
+    {
+      "name": "signature-bitflip",
+      "log": "signature-bitflip.jsonl",
+      "ledger": "ledger.json",
+      "expect": "fail",
+      "failing_check": "checkpoint_signature"
+    },
+    {
+      "name": "ledger-truncated",
+      "log": "chain.jsonl",
+      "ledger": "ledger-truncated.json",
+      "expect": "fail",
+      "failing_check": "truncated",
+      "note": "the export holds fewer events than an anchored height"
+    },
+    {
+      "name": "ledger-rolled-back",
+      "log": "chain.jsonl",
+      "ledger": "ledger-rolled-back.json",
+      "expect": "fail",
+      "failing_check": "rolled_back",
+      "note": "the event at an anchored height diverges from the anchored head"
+    }
+  ]
+}

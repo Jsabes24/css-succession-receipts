@@ -1,0 +1,16 @@
+Succession Receipts — the open evidence format for Constitutional Stewardship System (CSS) authority succession
+Copyright (c) 2026 Continuity Laboratories
+
+This product includes documentation and conformance data developed by
+Continuity Laboratories (https://continuitylaboratories.com).
+
+Licensed under the Apache License, Version 2.0 (the "License"); see the LICENSE
+file. The License grants no rights to Continuity Laboratories' trademarks. In
+particular, "Succession Verified" is reserved by Continuity Laboratories for its
+verifier-conformance program: passing the published conformance corpus does not
+by itself authorize use of that mark.
+
+The Constitutional Stewardship System engine — the software that produces the
+evidence this format describes — and Continuity Laboratories' reference verifier
+are separate, proprietary software of Continuity Laboratories and are not
+licensed by this repository.

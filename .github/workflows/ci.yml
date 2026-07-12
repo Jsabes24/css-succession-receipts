@@ -1,0 +1,46 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  boundary-sweep:
+    name: Verify-only boundary sweep
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sweep for engine-internal references
+        run: sh scripts/boundary-sweep.sh
+
+  corpus-integrity:
+    name: Corpus integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checksums match (published revisions are immutable)
+        run: sha256sum -c corpus/SHA256SUMS
+      - name: Manifests parse and reference existing files
+        run: |
+          python3 - <<'EOF'
+          import json, pathlib, sys
+          bad = 0
+          manifests = sorted(pathlib.Path('corpus').glob('*/r*/manifest.json'))
+          if not manifests:
+              print('no manifests found'); sys.exit(1)
+          for m in manifests:
+              d = json.loads(m.read_text())
+              base = m.parent
+              for key, rel in d.get('keys', {}).items():
+                  if not (base / rel).resolve().exists():
+                      print(f'{m}: missing key file {rel}'); bad = 1
+              for case in d['cases']:
+                  for f in [case.get('file')] + ([case['log']] if 'log' in case else []) + ([case['ledger']] if 'ledger' in case else []):
+                      if f and not (base / f).exists():
+                          print(f'{m}: case {case["name"]} missing file {f}'); bad = 1
+                  if case['expect'] == 'fail' and not case.get('failing_check'):
+                      print(f'{m}: failing case {case["name"]} lacks failing_check'); bad = 1
+              print(f'{m}: {len(d["cases"])} cases ok')
+          sys.exit(bad)
+          EOF

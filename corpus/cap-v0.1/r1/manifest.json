@@ -1,0 +1,53 @@
+{
+  "artifact": "capability-credential",
+  "spec_version": "0.1",
+  "revision": 1,
+  "keys": {
+    "cap-vector-1": "../../keys/cap-vector.pub.pem"
+  },
+  "cases": [
+    {
+      "name": "golden",
+      "file": "golden.json",
+      "eval_at": "2026-07-06T12:00:30Z",
+      "expect": "pass"
+    },
+    {
+      "name": "golden-expired",
+      "file": "golden.json",
+      "eval_at": "2026-07-06T12:10:00Z",
+      "expect": "fail",
+      "failing_check": "window",
+      "note": "same credential evaluated after expires_at"
+    },
+    {
+      "name": "golden-not-yet-valid",
+      "file": "golden.json",
+      "eval_at": "2026-07-06T11:00:00Z",
+      "expect": "fail",
+      "failing_check": "window"
+    },
+    {
+      "name": "capability-altered",
+      "file": "capability-altered.json",
+      "eval_at": "2026-07-06T12:00:30Z",
+      "expect": "fail",
+      "failing_check": "proof"
+    },
+    {
+      "name": "deny-basis",
+      "file": "deny-basis.json",
+      "eval_at": "2026-07-06T12:00:30Z",
+      "expect": "fail",
+      "failing_check": "basis",
+      "note": "a validly signed credential must still never carry a deny as its basis"
+    },
+    {
+      "name": "proof-signature-bitflip",
+      "file": "proof-signature-bitflip.json",
+      "eval_at": "2026-07-06T12:00:30Z",
+      "expect": "fail",
+      "failing_check": "proof"
+    }
+  ]
+}

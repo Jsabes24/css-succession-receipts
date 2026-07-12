@@ -1,0 +1,304 @@
+# CSS Authority-Handoff Receipts (AHR) — v0.1 (draft)
+
+> **Publication note (Succession Receipts).** This specification is published as part
+> of **Succession Receipts** — the open verification surface for CSS evidence — see the repository README for scope. It is **v0.1,
+> draft**: the wire format is pinned by the golden vectors in [`corpus/`](../corpus/)
+> and validated by the conformance corpus in this repository; independent
+> verifier implementations conform by passing it.
+>
+> **Stability ladder.** v0.1 (draft) → v1.0 (stable). A published version is never
+> mutated: format changes only ever add a new version with new golden vectors, and
+> conforming verifiers keep verifying every published version. Corpus revisions
+> (`r1`, `r2`, …) are additive snapshots, never edits.
+>
+> **Algorithm registry.** Signatures use the canonical
+> `<alg>:<key_id>:<base64url(signature)>` string. `ed25519` (hash-then-sign over the
+> hex SHA-256 of the canonical bytes) is the sole registered algorithm at v0.1. New
+> algorithms (e.g. post-quantum schemes) are additive prefixes registered by a new
+> spec version; verifiers reject unregistered prefixes.
+>
+> **Reference implementation.** Receipts are issued by the proprietary CSS engine; the reference
+> verifier (`sr-verify`, maintained by Continuity Laboratories, including the hosted
+> in-browser verifier at <https://continuitylaboratories.com/verify>) is held
+> byte-compatible with it by the conformance corpus, which independent
+> implementations validate against equally.
+> This specification covers the wire format and its **verification** only.
+
+
+
+**Status:** Draft, published for review. The wire format is pinned by a golden
+test vector; changes follow the evolution rules in §9.
+**Reference verifier:** `sr-verify receipt` (maintained by Continuity Laboratories) —
+a standalone offline verifier.
+**Worked example:** [`corpus/ahr-v0.1/r1/golden.json`](../corpus/ahr-v0.1/r1/golden.json)
+— a complete, valid receipt, pinned byte-for-byte by the corpus.
+
+An **Authority-Handoff Receipt** is a portable JSON document that proves one completed,
+policy-gated transfer of authority between two agents (stewards), including the obligation
+and commitment lineage the transfer carried forward. It is designed to be verified
+**offline, by parties who do not run CSS**: everything needed to check it — the evidence
+events, their hashes, their signatures, and the issuer's signature over the whole — is in
+the document itself, plus the issuer's public key(s).
+
+The receipt answers, verifiably: *who held this authority, who holds it now, under what
+legitimacy determination did the transfer run, which obligations and commitments carried
+forward, and what recorded evidence supports each of those claims.*
+
+---
+
+## 1. What a receipt attests — and what it does not
+
+A valid receipt attests that the issuing registry **recorded**:
+
+- a succession that was proposed, validated, approved under a named legitimacy
+  evaluation, and completed (the succession state machine permits no other path to
+  Completed);
+- the revocation of each predecessor authority the completion superseded, with the
+  succession recorded as its basis;
+- the derivation of the successor's authority, bound to the successor's accountability
+  chain, with its scope;
+- the inheritance of every obligation and commitment the transfer carried; and
+- the replacement of the predecessor steward.
+
+A receipt does **not** attest that anything outside the registry was enforced. CSS
+refusals gate ledger transitions, not external agent actions (see the scope-of-enforcement
+note in the README and the
+threat model). A receipt is evidence of *recorded,
+policy-gated authority state* — the artifact an integrator, auditor, or counterparty
+checks before honoring a successor agent.
+
+## 2. Data model
+
+A receipt is a single JSON object. It is **shaped like a W3C Verifiable Credential 2.0**
+(same top-level members, so VC-aware tooling can carry it), but it is plain JSON: JSON-LD
+processing is not required, and the proof is the CSS suite defined in §3, not a W3C Data
+Integrity suite (§8 discusses interop honestly).
+
+| Member | Type | Description |
+|---|---|---|
+| `@context` | array of string | Exactly `["https://www.w3.org/ns/credentials/v2", "urn:css:ahr:v0.1"]`. Informative; identifies the vocabulary. |
+| `type` | array of string | Exactly `["VerifiableCredential", "AuthorityHandoffReceipt"]`. |
+| `spec_version` | string | `"0.1"`. Bumps on breaking wire-format change (§9). |
+| `issuer` | object | `{"id": <string>}` — identifies the issuing registry operator. Default `"urn:css:registry"` when the operator has not configured one. |
+| `validFrom` | string (RFC 3339) | The timestamp of the `SuccessionCompleted` evidence event. The authority state the receipt describes holds from this instant. |
+| `credentialSubject` | object | The claims (§2.1). |
+| `evidence` | array of object | The grounding event envelopes, verbatim (§2.2). |
+| `proof` | object | The issuer's signature over the canonical receipt (§3). Present on issued receipts; a receipt without `proof` MUST fail verification. |
+
+### 2.1 `credentialSubject` — the claims
+
+| Member | Type | Description |
+|---|---|---|
+| `id` | string | `"urn:uuid:" + succession_id`. |
+| `succession_id` | UUID | The succession this receipt describes. |
+| `predecessor.steward_id` | UUID | The outgoing steward. |
+| `predecessor.identity_id` | UUID, optional | The identity bound at the predecessor's assignment, when on record. |
+| `predecessor.revoked_authorities` | array | Every authority the completion superseded: `{"authority_id": UUID, "revocation_basis": string}`. The basis records the succession (`"superseded by succession <id>"`). Empty array when the predecessor held none. |
+| `predecessor.replaced` | bool | Whether a `StewardReplaced` event is on record. |
+| `successor.steward_id` | UUID | The incoming steward. |
+| `successor.identity_id` | UUID, optional | The identity bound at the successor's assignment, when on record. |
+| `successor.authority_id` | UUID | The succession-derived authority. |
+| `successor.authority_scope` | string | The derived authority's scope, verbatim from `AuthorityGranted`. |
+| `successor.accountability_chain_id` | UUID | The accountability chain the authority is bound to (GIR2). |
+| `successor.authority_status` | string | `"granted"` — derived but not yet validated into force (post-succession governance review still open) — or `"active"` — an `AuthorityValidated` event is on record. |
+| `legitimacy.legitimacy_id` | UUID | The legitimacy evaluation the transfer ran under (recorded by `SuccessionApproved`). |
+| `legitimacy.legitimacy_state` | string, optional | The determined state (`"L3"`, `"L4"`, `"L5"`), when the determination event is on record. |
+| `obligations_carried` | array of UUID | Every obligation inherited by the successor in this completion. Sorted lexicographically. |
+| `commitments_carried` | array of UUID, optional | Every commitment inherited. Sorted lexicographically; omitted when none. |
+
+### 2.2 `evidence` — the grounding events
+
+Each evidence entry is one CSS event envelope, **verbatim as stored**:
+
+```json
+{
+  "event_id": "…", "event_type": "…", "aggregate_type": "…", "aggregate_id": "…",
+  "correlation_id": "…", "previous_event_id": "…", "timestamp": "…",
+  "event_version": 1, "payload": { … }, "event_hash": "…", "signature": "…"
+}
+```
+
+`event_hash` is the platform's SHA-256 event hash; `signature` (optional — absent in
+unsigned deployments) is the platform's Ed25519 event signature. Both verify with the
+rules in §4. `causation_id` and `actor_id` may also appear; they are carried verbatim
+but play no role in receipt verification.
+
+The evidence set for a receipt comprises: the succession stream (`SuccessionProposed`,
+`SuccessionValidated`, `SuccessionApproved`, `SuccessionCompleted`); every event sharing
+the completion's `correlation_id` (inheritance, chain linkage, authority supersession and
+derivation, steward replacement); the steward assignment events binding each party's
+identity; the `LegitimacyDetermined` event for the approving evaluation, when on record;
+and any `AuthorityValidated` on the derived authority's stream. Entries are deduplicated
+by `event_id` and sorted by `(timestamp, event_id)`.
+
+Every claim in §2.1 corresponds to one or more evidence events; §4 step 4 defines the
+correspondence normatively.
+
+## 3. Canonicalization and proof
+
+**Canonical form.** The canonical bytes of a receipt are the UTF-8 JSON serialization of
+the receipt **with the `proof` member absent**, with:
+
+- object members sorted lexicographically by key (byte order of the UTF-8 key),
+- no insignificant whitespace,
+- minimal string escaping (no HTML escaping; non-ASCII characters literal UTF-8).
+
+The receipt value domain is strings, booleans, integers, arrays, and objects — no
+floating-point numbers — so this coincides with RFC 8785 (JCS) output for every receipt
+this spec can produce. Implementations MAY use a JCS library.
+
+**Receipt hash.** `receipt_hash = lowercase hex( SHA-256( canonical bytes ) )`.
+
+**Proof.** The issuer signs the **receipt hash string** (its ASCII bytes, not the raw
+digest) — the same hash-then-sign discipline the platform applies to events and audit
+records — with the registry's event-signing Ed25519 key:
+
+| Member | Description |
+|---|---|
+| `type` | `"CSSEd25519Signature"`. |
+| `created` | Proof timestamp (RFC 3339). Outside the signed content: re-issuing an identical receipt later yields the same `receipt_hash` and a different `created`. |
+| `verification_method` | The signing `key_id` (operator-managed label; supports rotation). |
+| `receipt_hash` | As defined above. Informative — verifiers MUST recompute it (§4). |
+| `signature` | `"ed25519:<key_id>:<base64url-no-padding(signature)>"` — the platform's canonical signature format. |
+
+## 4. Verification algorithm (normative)
+
+Input: a receipt document and the issuer's Ed25519 public key(s), keyed by `key_id`.
+A verifier MUST perform all four steps; any failure invalidates the receipt.
+
+1. **Proof.** Reject if `proof` is absent. Compute the canonical bytes (§3) of the
+   received document with `proof` removed; recompute `receipt_hash`; verify
+   `proof.signature` over the **recomputed** hash string using the public key named by
+   the signature's `key_id`. (Verifying against the recomputed hash — never the stored
+   `proof.receipt_hash` — makes tampering with either the content or the stored hash
+   fail closed.)
+2. **Evidence integrity.** For every evidence event, recompute the event hash and reject
+   on mismatch. The platform event-hash rule:
+
+   ```
+   event_hash = lowercase hex( SHA-256(
+       event_id ∥ event_type ∥ aggregate_type ∥ aggregate_id
+       ∥ RFC3339Nano(timestamp) ∥ decimal(event_version)
+       ∥ payload_json ∥ previous_event_id_or_empty ) )
+   ```
+
+   UUIDs as lowercase hyphenated strings; `payload_json` is the payload's compact JSON
+   serialization **in the stored field order** (the reference implementation restores
+   each payload's concrete type from the event-type registry before re-serializing —
+   generic re-serialization with re-ordered keys will not reproduce the hash).
+   `correlation_id`, `causation_id`, `actor_id`, and `signature` are excluded from the
+   hash by construction.
+3. **Evidence authenticity.** For every evidence event carrying a `signature`, verify it
+   over the event's `event_hash` string with the key named by its `key_id`. A present
+   but invalid signature is a failure. An absent signature is **reported, not a
+   failure** (unsigned deployments exist; the receipt proof from step 1 still covers the
+   evidence bytes) — verifiers SHOULD surface signed/unsigned counts.
+4. **Claim grounding.** Reject unless all of the following hold:
+   - a `SuccessionCompleted` evidence event matches `succession_id`, and `validFrom`
+     equals its timestamp; `credentialSubject.id` equals `"urn:uuid:" + succession_id`;
+   - a `SuccessionProposed` evidence event names exactly the claimed predecessor and
+     successor stewards;
+   - a `SuccessionApproved` evidence event exists and, when it records a legitimacy ID,
+     it equals `legitimacy.legitimacy_id`;
+   - an `AuthorityGranted` evidence event matches the claimed successor authority
+     (`authority_id`, `steward_id`, `authority_scope`, `accountability_chain_id`) and
+     carries the completion's `correlation_id`;
+   - if `authority_status` is `"active"`, an `AuthorityValidated` evidence event exists
+     for the successor authority; `"granted"` requires nothing further; any other value
+     is invalid;
+   - if `predecessor.replaced` is true, a `StewardReplaced` evidence event exists for
+     the predecessor;
+   - each entry of `revoked_authorities` matches an `AuthorityRevoked` evidence event
+     (ID and basis), **and every `AuthorityRevoked` evidence event is declared** — a
+     receipt may neither invent nor conceal a revocation;
+   - `obligations_carried` equals — as a set — the `ObligationInherited` evidence events
+     naming the successor, and `commitments_carried` likewise for
+     `CommitmentInherited` — a receipt may neither invent nor conceal carried lineage.
+
+The tamper matrix exercises each step's failure mode, including a lying issuer who
+re-signs altered content (caught by steps 2–4 even though step 1 passes).
+
+## 5. Issuance
+
+Receipts are assembled **read-only** from already-recorded events — issuance writes
+nothing and cannot alter constitutional state. Receipts exist **only for completed
+successions**: a proposed, rejected, or in-flight succession has no receipt. Deployments
+running unsigned issue receipts without `proof`; such receipts fail §4 verification by
+design — verifiable issuance requires signing to be configured.
+
+Offline verification: `sr-verify receipt -receipt <file> -public-keys key_id=path[,…]`
+— no database, no server, exit 0 iff the receipt verifies.
+
+## 6. Trust model and limitations
+
+- **Issuer-rooted.** A receipt proves what the issuing registry recorded, under the keys
+  you trust for it. It does not prove the registry recorded everything — omission of an
+  entire succession, or a receipt for a fork of history, is detectable only against the
+  ledger itself (a full [ledger export](./ledger-export.md) replays the complete hash
+  chain) or an external anchor ([external anchoring](./external-anchoring.md) defines
+  periodic signed checkpoints of the head): a rollback by a
+  storage-privileged insider after issuance is out of the receipt's detection scope,
+  though any receipt already in a counterparty's hands becomes durable evidence against
+  exactly that class of tampering.
+- **Evidence subset, not chain proof.** Evidence events verify individually (hash +
+  signature) but are a cross-stream subset: a receipt does not prove stream contiguity
+  or completeness of the surrounding ledger. Chain-position verification is the ledger's
+  job (`sr-verify ledger` over a full export); the two-direction rules in §4 step 4 do
+  guarantee the receipt cannot misstate the lineage *within its own evidence*.
+- **Key trust is out of band.** Distribution, rotation, and pinning of the registry's
+  public keys follow [`keyset.md`](./keyset.md). `key_id` labels support rotation;
+  verifiers hold a key set.
+- **No revocation of receipts.** A receipt is a statement about recorded history at
+  `validFrom`; later constitutional events (a further succession, an authority
+  revocation) do not invalidate it — they produce newer receipts. Consumers MUST treat
+  `authority_status` as of `validFrom` and check for newer successions when currency
+  matters.
+
+## 7. Worked example
+
+[`corpus/ahr-v0.1/r1/golden.json`](../corpus/ahr-v0.1/r1/golden.json)
+is a complete valid receipt over a fixed succession (deterministic UUIDs, timestamps, and
+a published test key), pinned byte-for-byte by the corpus. Its vector
+key is the Ed25519 seed `00 01 02 … 1f` under `key_id` `ahr-vector-1` — an implementer
+can reproduce every hash and signature in the file from this spec alone. Canonical
+receipt hash of the vector:
+
+```
+8b32bca8faaee70b2ff41cfffa4ff5ef0f51f024af18553dc01676310984cf9f
+```
+
+## 8. Interoperability
+
+**W3C Verifiable Credentials 2.0.** The receipt reuses the VC envelope members
+(`@context`, `type`, `issuer`, `validFrom`, `credentialSubject`, `proof`) with compatible
+semantics, so credential-shaped tooling (wallets, registries, policy engines that route
+VCs) can carry receipts unmodified. It is **not** a conformant VC: the proof suite is the
+CSS discipline of §3 rather than a registered Data Integrity cryptosuite, `issuer.id` and
+`credentialSubject.id` are URNs rather than resolvable DIDs, and no JSON-LD context
+resolution is defined. If a conformant profile is wanted later, the migration path is an
+`eddsa-jcs-2022` proof alongside the CSS proof — the canonical form in §3 was chosen to
+be JCS-compatible precisely to keep that door open (additive, §9).
+
+**in-toto / SLSA.** A receipt is conceptually an attestation in the in-toto sense —
+signed evidence that a step (the handoff) was performed by authorized parties under a
+policy (the constitutional gates). The `evidence` array plays the role of link metadata;
+the succession state machine plays the role of the layout. Mapping a receipt onto an
+in-toto attestation predicate (`predicateType: urn:css:ahr:v0.1`) is mechanical if an
+integration needs it.
+
+## 9. Evolution and stability
+
+The stability contract mirrors the platform's
+event schema evolution strategy:
+
+- **Additive changes** (new optional members, new optional claims) do not bump
+  `spec_version`; verifiers MUST ignore unknown members (they are covered by the
+  canonical form and the proof, but carry no verification rules).
+- **Breaking changes** (member removal/rename, canonicalization or proof changes,
+  claim-semantics changes) bump `spec_version`; verifiers reject versions they do not
+  implement.
+- The golden vector pins the v0.1 wire format: any byte-level drift fails the
+  conformance corpus and forces an explicit versioning decision.
+- Evidence envelopes evolve under the platform's own rules (`event_version` +
+  upcasters); receipts always carry events **verbatim as stored**, so receipt
+  verification is independent of upcasting (which sits strictly above stored history).

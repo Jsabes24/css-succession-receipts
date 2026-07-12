@@ -1,0 +1,47 @@
+{
+  "artifact": "css-ledger-export",
+  "spec_version": "0.1",
+  "revision": 1,
+  "keys": {
+    "cle-vector-1": "../../keys/vector.pub.pem"
+  },
+  "cases": [
+    {
+      "name": "golden",
+      "file": "golden.json",
+      "expect": "pass"
+    },
+    {
+      "name": "event-payload-altered",
+      "file": "event-payload-altered.json",
+      "expect": "fail",
+      "failing_check": "event_hash"
+    },
+    {
+      "name": "stream-fork",
+      "file": "stream-fork.json",
+      "expect": "fail",
+      "failing_check": "linkage",
+      "note": "two events claim the same predecessor"
+    },
+    {
+      "name": "count-mismatch",
+      "file": "count-mismatch.json",
+      "expect": "fail",
+      "failing_check": "structure",
+      "note": "an event dropped without updating event_count"
+    },
+    {
+      "name": "audit-record-altered",
+      "file": "audit-record-altered.json",
+      "expect": "fail",
+      "failing_check": "audit_chain"
+    },
+    {
+      "name": "proof-signature-bitflip",
+      "file": "proof-signature-bitflip.json",
+      "expect": "fail",
+      "failing_check": "proof"
+    }
+  ]
+}

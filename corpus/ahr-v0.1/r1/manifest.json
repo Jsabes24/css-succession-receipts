@@ -1,0 +1,71 @@
+{
+  "artifact": "authority-handoff-receipt",
+  "spec_version": "0.1",
+  "revision": 1,
+  "keys": {
+    "ahr-vector-1": "../../keys/vector.pub.pem"
+  },
+  "cases": [
+    {
+      "name": "golden",
+      "file": "golden.json",
+      "expect": "pass"
+    },
+    {
+      "name": "proof-signature-bitflip",
+      "file": "proof-signature-bitflip.json",
+      "expect": "fail",
+      "failing_check": "proof",
+      "note": "signature corrupted, content untouched"
+    },
+    {
+      "name": "content-altered",
+      "file": "content-altered.json",
+      "expect": "fail",
+      "failing_check": "proof",
+      "note": "claimed scope widened; recomputed canonical hash no longer matches receipt_hash"
+    },
+    {
+      "name": "lying-issuer-untrusted",
+      "file": "lying-issuer-untrusted.json",
+      "expect": "fail",
+      "failing_check": "proof",
+      "note": "attacker re-canonicalizes, re-hashes and re-signs under the trusted key_id with an untrusted key"
+    },
+    {
+      "name": "lying-issuer-trusted-key",
+      "file": "lying-issuer-trusted-key.json",
+      "expect": "fail",
+      "failing_check": "evidence_hash",
+      "note": "compromised-key model: receipt proof valid over tampered evidence; the evidence event hash exposes it"
+    },
+    {
+      "name": "evidence-signature-stale",
+      "file": "evidence-signature-stale.json",
+      "expect": "fail",
+      "failing_check": "evidence_signature",
+      "note": "evidence re-hashed but its event signature is stale"
+    },
+    {
+      "name": "claim-hidden-obligation",
+      "file": "claim-hidden-obligation.json",
+      "expect": "fail",
+      "failing_check": "claim_grounding",
+      "note": "an inherited obligation is not declared — lineage completeness"
+    },
+    {
+      "name": "claim-invented-obligation",
+      "file": "claim-invented-obligation.json",
+      "expect": "fail",
+      "failing_check": "claim_grounding",
+      "note": "a claimed obligation has no inheritance event"
+    },
+    {
+      "name": "proof-stripped",
+      "file": "proof-stripped.json",
+      "expect": "fail",
+      "failing_check": "proof",
+      "note": "unsigned receipt"
+    }
+  ]
+}
