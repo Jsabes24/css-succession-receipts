@@ -36,15 +36,15 @@ informative:
   RFC9162:
   SR-REPO:
     title: "Succession Receipts: specifications and conformance corpus"
-    target: https://github.com/Jsabes24/css-succession-receipts
+    target: https://github.com/jsabes24/css-succession-receipts
     date: 2026
   SR-AHR:
     title: "CSS Authority-Handoff Receipts (AHR) v0.1"
-    target: https://github.com/Jsabes24/css-succession-receipts/blob/main/spec/authority-handoff-receipts.md
+    target: https://github.com/jsabes24/css-succession-receipts/blob/main/spec/authority-handoff-receipts.md
     date: 2026
   SR-CORPUS:
     title: "Succession Receipts conformance corpus"
-    target: https://github.com/Jsabes24/css-succession-receipts/tree/main/corpus
+    target: https://github.com/jsabes24/css-succession-receipts/tree/main/corpus
     date: 2026
   VC-DATA-MODEL:
     title: "Verifiable Credentials Data Model v2.0"
