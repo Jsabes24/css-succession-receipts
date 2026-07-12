@@ -40,14 +40,14 @@ they implement.
 |---|---|---|
 | **Authority-Handoff Receipt** (AHR) | [spec/authority-handoff-receipts.md](./spec/authority-handoff-receipts.md) | One completed, policy-gated authority handoff: parties, revoked and derived authorities, the legitimacy evaluation it ran under, and the full obligation/commitment lineage — every claim grounded in signed evidence events |
 | **CSS Ledger Export** (CLE) | [spec/ledger-export.md](./spec/ledger-export.md) | An entire ledger: every event in publication order, hash-chain linkage, signatures, every audit chain, and the issuer's completeness attestation |
-| **Capability credential** (CAP) | [spec/authorization-decisions.md](./spec/authorization-decisions.md) §8 | A short-lived signed capability: the issuer proof, the validity window, and that its basis is a genuine permit decision |
+| **Capability credential** (CAP) | [spec/authorization-decisions.md](./spec/authorization-decisions.md) §2.2 | A short-lived signed capability: the issuer proof, the validity window, and that its basis is a genuine permit decision |
 | **Anchoring checkpoints** | [spec/external-anchoring.md](./spec/external-anchoring.md) | That a ledger export was not truncated or rolled back below any externally anchored head |
 
 Key discovery and pinning: [spec/keyset.md](./spec/keyset.md).
 
 ## Verify CSS evidence today
 
-- **In the browser, no install:** <https://continuitylaboratories.com/verify> — paste
+- **In the browser, no install:** <https://continuitylaboratories.com/receipts> — paste
   a receipt or drop a file; everything runs locally in the page and nothing you paste
   leaves the browser.
 - **Reference verifier:** `sr-verify` (one subcommand per artifact) is maintained by
