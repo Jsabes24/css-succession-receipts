@@ -1,21 +1,23 @@
-# CSS Authority-Handoff Receipts (AHR) — v0.1 (draft)
+# CSS Authority-Handoff Receipts (AHR) — v0.2 (draft)
 
 > **Publication note (Succession Receipts).** This specification is published as part
-> of **Succession Receipts** — the open verification surface for CSS evidence — see the repository README for scope. It is **v0.1,
-> draft**: the wire format is pinned by the golden vectors in [`corpus/`](../corpus/)
-> and validated by the conformance corpus in this repository; independent
-> verifier implementations conform by passing it.
+> of **Succession Receipts** — the open verification surface for CSS evidence — see the repository README for scope. Published
+> versions: **v0.1** (frozen — never mutated) and **v0.2** (current, draft; adds the
+> `constitution` and `ledger_binding` claims, §2.1). The wire format of each version is
+> pinned by its golden vectors in [`corpus/`](../corpus/) and validated by the
+> conformance corpus in this repository; independent verifier implementations conform
+> by passing it — for **every** published version.
 >
-> **Stability ladder.** v0.1 (draft) → v1.0 (stable). A published version is never
+> **Stability ladder.** v0.1 (draft) → v0.2 (draft) → v1.0 (stable). A published version is never
 > mutated: format changes only ever add a new version with new golden vectors, and
 > conforming verifiers keep verifying every published version. Corpus revisions
 > (`r1`, `r2`, …) are additive snapshots, never edits.
 >
 > **Algorithm registry.** Signatures use the canonical
 > `<alg>:<key_id>:<base64url(signature)>` string. `ed25519` (hash-then-sign over the
-> hex SHA-256 of the canonical bytes) is the sole registered algorithm at v0.1. New
-> algorithms (e.g. post-quantum schemes) are additive prefixes registered by a new
-> spec version; verifiers reject unregistered prefixes.
+> hex SHA-256 of the canonical bytes) is the sole registered algorithm at v0.1 and
+> v0.2. New algorithms (e.g. post-quantum schemes) are additive prefixes registered by
+> a new spec version; verifiers reject unregistered prefixes.
 >
 > **Reference implementation.** Receipts are issued by the proprietary CSS engine; the reference
 > verifier (`sr-verify`, maintained by Continuity Laboratories, including the hosted
@@ -26,12 +28,14 @@
 
 
 
-**Status:** Draft, published for review. The wire format is pinned by a golden
-test vector; changes follow the evolution rules in §9.
+**Status:** Draft, published for review. The wire format is pinned by golden
+test vectors; changes follow the evolution rules in §9.
 **Reference verifier:** `sr-verify receipt` (maintained by Continuity Laboratories) —
 a standalone offline verifier.
-**Worked example:** [`corpus/ahr-v0.1/r1/golden.json`](../corpus/ahr-v0.1/r1/golden.json)
-— a complete, valid receipt, pinned byte-for-byte by the corpus.
+**Worked example:** [`corpus/ahr-v0.2/r1/golden.json`](../corpus/ahr-v0.2/r1/golden.json)
+— a complete, valid v0.2 receipt, pinned byte-for-byte by the corpus
+([`corpus/ahr-v0.1/r1/golden.json`](../corpus/ahr-v0.1/r1/golden.json) is the frozen
+v0.1 vector).
 
 An **Authority-Handoff Receipt** is a portable JSON document that proves one completed,
 policy-gated transfer of authority between two agents (stewards), including the obligation
@@ -76,9 +80,9 @@ Integrity suite (§8 discusses interop honestly).
 
 | Member | Type | Description |
 |---|---|---|
-| `@context` | array of string | Exactly `["https://www.w3.org/ns/credentials/v2", "urn:css:ahr:v0.1"]`. Informative; identifies the vocabulary. |
+| `@context` | array of string | Exactly `["https://www.w3.org/ns/credentials/v2", "urn:css:ahr:v0.2"]` (v0.1 receipts carry `urn:css:ahr:v0.1`). Informative; identifies the vocabulary. |
 | `type` | array of string | Exactly `["VerifiableCredential", "AuthorityHandoffReceipt"]`. |
-| `spec_version` | string | `"0.1"`. Bumps on breaking wire-format change (§9). |
+| `spec_version` | string | `"0.2"` (published: `"0.1"`, `"0.2"`). Bumps on breaking wire-format or claim-semantics change (§9); verifiers reject versions they do not implement. |
 | `issuer` | object | `{"id": <string>}` — identifies the issuing registry operator. Default `"urn:css:registry"` when the operator has not configured one. |
 | `validFrom` | string (RFC 3339) | The timestamp of the `SuccessionCompleted` evidence event. The authority state the receipt describes holds from this instant. |
 | `credentialSubject` | object | The claims (§2.1). |
@@ -105,6 +109,8 @@ Integrity suite (§8 discusses interop honestly).
 | `legitimacy.legitimacy_state` | string, optional | The determined state (`"L3"`, `"L4"`, `"L5"`), when the determination event is on record. |
 | `obligations_carried` | array of UUID | Every obligation inherited by the successor in this completion. Sorted lexicographically. |
 | `commitments_carried` | array of UUID, optional | Every commitment inherited. Sorted lexicographically; omitted when none. |
+| `constitution` | object | **v0.2, required.** The constitutional lineage the handoff ran under: `genesis_event_hash` (the `GenesisInitialized` event hash — the lineage root every deployment has exactly one of), `amendments_ratified` (count of `AmendmentRatified` events in force at completion), and `amendment_head_hash` (event hash of the latest such amendment; omitted when the count is 0). All referenced events are carried in `evidence`, so the claim is recomputable from the receipt alone: a verifier proves not just *that* the transfer was governed but *by which* constitution. Absent on v0.1 receipts. |
+| `ledger_binding` | object | **v0.2, required.** The evidence horizon: `height` (1-based master-stream position of the receipt's final evidence event) and `event_hash` (that event's hash). Offline, the hash must match the final evidence event; against a [ledger export](./ledger-export.md) or an [anchored checkpoint](./external-anchoring.md), an auditor can additionally prove no correlated event at or below `height` was omitted — the completeness cross-check a bare evidence list cannot provide. Absent on v0.1 receipts. |
 
 ### 2.2 `evidence` — the grounding events
 
@@ -128,8 +134,10 @@ The evidence set for a receipt comprises: the succession stream (`SuccessionProp
 the completion's `correlation_id` (inheritance, chain linkage, authority supersession and
 derivation, steward replacement); the steward assignment events binding each party's
 identity; the `LegitimacyDetermined` event for the approving evaluation, when on record;
-and any `AuthorityValidated` on the derived authority's stream. Entries are deduplicated
-by `event_id` and sorted by `(timestamp, event_id)`.
+any `AuthorityValidated` on the derived authority's stream; and — v0.2 — the
+`GenesisInitialized` event plus every `AmendmentRatified` recorded at or before the
+completion in master-stream order (the constitution in force, §2.1). Entries are
+deduplicated by `event_id` and sorted by `(timestamp, event_id)`.
 
 Every claim in §2.1 corresponds to one or more evidence events; §4 step 4 defines the
 correspondence normatively.
@@ -164,7 +172,7 @@ records — with the registry's event-signing Ed25519 key:
 ## 4. Verification algorithm (normative)
 
 Input: a receipt document and the issuer's Ed25519 public key(s), keyed by `key_id`.
-A verifier MUST perform all four steps; any failure invalidates the receipt.
+A verifier MUST perform all five steps; any failure invalidates the receipt.
 
 1. **Proof.** Reject if `proof` is absent. Compute the canonical bytes (§3) of the
    received document with `proof` removed; recompute `receipt_hash`; verify
@@ -214,6 +222,20 @@ A verifier MUST perform all four steps; any failure invalidates the receipt.
    - `obligations_carried` equals — as a set — the `ObligationInherited` evidence events
      naming the successor, and `commitments_carried` likewise for
      `CommitmentInherited` — a receipt may neither invent nor conceal carried lineage.
+5. **Version claims.** Dispatch on `spec_version`; reject versions not implemented.
+   - `"0.1"`: reject if `constitution` or `ledger_binding` is present (published versions
+     are never mutated — v0.1 receipts carry neither claim).
+   - `"0.2"`: reject unless all of the following hold:
+     - **constitution (5a):** the claim is present; exactly one `GenesisInitialized`
+       event is in evidence and its recomputed hash equals `genesis_event_hash`; the
+       `AmendmentRatified` events in evidence recount to `amendments_ratified`, each
+       timestamped at or before `validFrom`; when the count is 0, `amendment_head_hash`
+       is absent, otherwise it equals the hash of the last `AmendmentRatified` in
+       canonical evidence order;
+     - **ledger binding (5b):** the claim is present; `event_hash` equals the recomputed
+       hash of the **final** evidence event in canonical order; `height` is at least the
+       evidence count. (The exact master-stream position is auditable against a ledger
+       export or an anchored checkpoint, not from the receipt alone — §6.)
 
 The tamper matrix exercises each step's failure mode, including a lying issuer who
 re-signs altered content (caught by steps 2–4 even though step 1 passes).
@@ -244,7 +266,10 @@ Offline verification: `sr-verify receipt -receipt <file> -public-keys key_id=pat
   signature) but are a cross-stream subset: a receipt does not prove stream contiguity
   or completeness of the surrounding ledger. Chain-position verification is the ledger's
   job (`sr-verify ledger` over a full export); the two-direction rules in §4 step 4 do
-  guarantee the receipt cannot misstate the lineage *within its own evidence*.
+  guarantee the receipt cannot misstate the lineage *within its own evidence*, and —
+  v0.2 — the `ledger_binding` claim states the master-stream position the evidence
+  extends to, so an auditor holding a ledger export or an anchored checkpoint can prove
+  no correlated event at or below that height was omitted.
 - **Key trust is out of band.** Distribution, rotation, and pinning of the registry's
   public keys follow [`keyset.md`](./keyset.md). `key_id` labels support rotation;
   verifiers hold a key set.
