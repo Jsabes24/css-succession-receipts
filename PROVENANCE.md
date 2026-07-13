@@ -72,10 +72,17 @@ The three release assets — `SHA256SUMS`, `SHA256SUMS.sigstore.json`, and
 `SHA256SUMS.ots` — all correspond byte-for-byte to the in-tree
 [`corpus/SHA256SUMS`](./corpus/SHA256SUMS).
 
-**Version numbering.** This repository's first release is `v0.1.1`. The
-`v0.1.0` and `v0.2.0` tag names were used by a superseded lineage of this
-repository and are permanently retired under GitHub's immutable-release
-guarantee; the wire-format spec version (0.1) and the r1 corpus vectors are
+**Version numbering.** This repository's first release is v0.1.1 v0.1.2 is a 
+Documentation-only patch: it lowercases the jsabes24 casing in the
+internet-Draft's refrence URLs and changes nothing under corpus/,so its
+SHA256SUMS (df3b122f,,,cf00e44) is bye-identical to v0.1.1's and is 
+already anchored by the same Bitcoin timestamp. Its tag was minted by
+the release workflow's dispatch path and is therefore a lightweight,
+unsigned tag-unlike the SSH-signed v0.1.1 tag above; future releases
+should be cut from a signed annotated tag to preserve the signed tag
+guarantee, The v0.1.0 and v0.2.0 tag names were used by a superseded lineage
+of this repository and are permanently retired under Github's immuutable-release
+guarante; the wire-format spec version (0.1) and the r1 corpus vectors are 
 unchanged.
 
 **Why both a transparency log and OpenTimestamps.** The log gives an immediate,
