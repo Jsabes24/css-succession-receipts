@@ -39,7 +39,7 @@ informative:
     target: https://github.com/jsabes24/css-succession-receipts
     date: 2026
   SR-AHR:
-    title: "CSS Authority-Handoff Receipts (AHR) v0.1"
+    title: "CSS Authority-Handoff Receipts (AHR)"
     target: https://github.com/jsabes24/css-succession-receipts/blob/main/spec/authority-handoff-receipts.md
     date: 2026
   SR-CORPUS:
@@ -156,15 +156,16 @@ A Succession Receipt is a UTF-8 JSON {{RFC8259}} object shaped after the
 W3C Verifiable Credentials data model {{VC-DATA-MODEL}} as plain JSON:
 the `@context` member is carried for interoperability, and JSON-LD
 processing is NOT REQUIRED. The complete normative member catalog, with
-types and constraints, is the AHR v0.1 specification {{SR-AHR}}; this
-section summarizes the structure a verifier depends on.
+types and constraints, is the AHR specification {{SR-AHR}}, which publishes
+version 0.1 (frozen) and version 0.2 (current); this section summarizes the
+structure a verifier depends on and shows a version 0.2 receipt.
 
 ~~~
 {
   "@context":     ["https://www.w3.org/ns/credentials/v2",
-                   "urn:css:ahr:v0.1"],
+                   "urn:css:ahr:v0.2"],
   "type":         ["VerifiableCredential", "AuthorityHandoffReceipt"],
-  "spec_version": "0.1",
+  "spec_version": "0.2",
   "issuer":       { "id": "urn:css:registry" },
   "validFrom":    "2026-07-04T12:00:14Z",
   "credentialSubject": {
@@ -179,6 +180,11 @@ section summarizes the structure a verifier depends on.
                        "accountability_chain_id": "<uuid>",
                        "authority_status": "granted" | "active" },
     "legitimacy":    { "legitimacy_id": "<uuid>" },
+    "constitution":  { "genesis_event_hash": "<hex>",
+                       "amendments_ratified": <count>,
+                       "amendment_head_hash": "<hex>" },
+    "ledger_binding": { "height": <int>,
+                        "event_hash": "<hex>" },
     "obligations_carried": [ "<uuid>", ... ],
     "commitments_carried": [ "<uuid>", ... ]
   },
@@ -192,6 +198,20 @@ section summarizes the structure a verifier depends on.
   }
 }
 ~~~
+
+The `constitution` and `ledger_binding` members are **REQUIRED at version
+0.2 and absent at version 0.1**. `constitution` records the constitutional
+lineage the transfer ran under: `genesis_event_hash` (the hash of the
+genesis event that roots the lineage), `amendments_ratified` (the count of
+ratified amendments in force at completion), and `amendment_head_hash` (the
+hash of the latest such amendment, omitted when the count is zero).
+`ledger_binding` records the receipt's evidence horizon: `height` (the
+1-based position of the receipt's final evidence event in the issuer's
+ordered event stream) and `event_hash` (that event's hash). Both are
+grounded in the embedded evidence ({{verification}}), so a verifier
+recomputes them from the receipt alone. A version 0.1 receipt names
+`urn:css:ahr:v0.1` in `@context`, sets `spec_version` to `0.1`, and omits
+both members; a conforming verifier accepts either version.
 
 Each evidence event envelope carries `event_id`, `event_type`,
 `aggregate_type`, `aggregate_id`, optional `causation_id` /
@@ -221,8 +241,8 @@ that digest; `signature` is the canonical signature string:
 ~~~
 
 `ed25519` ({{RFC8032}}, deterministic signatures) is the sole algorithm
-registered at spec version 0.1. `key_id` is an issuer-managed label,
-deliberately NOT derived from the key: a verifier holds a `key_id` to
+registered at spec versions 0.1 and 0.2. `key_id` is an issuer-managed
+label, deliberately NOT derived from the key: a verifier holds a `key_id` to
 public-key map, so key rotation adds a mapping without invalidating
 already-issued receipts. An unrecognized `<alg>` prefix MUST be rejected;
 new algorithms (including post-quantum schemes) are additive prefixes
@@ -272,6 +292,18 @@ pinned out of band. Verification MUST perform, in order:
    `revoked_authorities`, is fatal. A receipt can therefore neither
    invent nor conceal an effect of the transfer.
 
+   For version 0.2 receipts, two further claims are grounded.
+   `constitution` MUST be supported by exactly one `GenesisInitialized`
+   event in the evidence whose hash equals `genesis_event_hash`; when
+   `amendments_ratified` is greater than zero, `amendment_head_hash` MUST
+   equal the hash of the latest `AmendmentRatified` event in evidence and
+   the count MUST match. `ledger_binding.event_hash` MUST equal the hash
+   of the receipt's final evidence event, and `height` states that event's
+   position in the issuer's ordered stream; against a ledger export or an
+   anchored checkpoint {{SR-REPO}} a relying party can additionally confirm
+   that no event at or below `height` was omitted — a completeness
+   cross-check a single receipt cannot provide alone.
+
 A conforming verifier MUST accept every golden vector and MUST reject
 every tamper case of the published conformance corpus {{SR-CORPUS}} at
 the named check.
@@ -281,8 +313,10 @@ the named check.
 `spec_version` identifies the wire format. Published versions are never
 mutated: format changes only ever add a new version with new golden
 vectors, and verifiers SHOULD continue to verify every published version.
-Version 0.1 is a draft with a stated stability ladder toward 1.0
-{{SR-AHR}}.
+Versions 0.1 (frozen) and 0.2 (current) are drafts on a stated stability
+ladder toward a stable 1.0 {{SR-AHR}}; 0.2 adds the `constitution` and
+`ledger_binding` claims additively, and a conforming verifier accepts both
+versions.
 
 # Security Considerations
 
@@ -310,7 +344,9 @@ logs {{RFC9162}}), both published alongside this format {{SR-REPO}}. The
 anchoring extension point is designed to register ledger-head commitments
 with a SCITT transparency service {{I-D.ietf-scitt-architecture}}, so
 anchoring composes with the emerging standard rather than inventing a
-parallel witness ecosystem.
+parallel witness ecosystem. A version 0.2 `ledger_binding` claim states
+the evidence horizon (`height`) at which such a completeness cross-check
+applies.
 
 **Deterministic serialization is load-bearing.** Implementations MUST
 reproduce the canonical form and the payload's document-order
