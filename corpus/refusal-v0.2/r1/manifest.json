@@ -1,0 +1,121 @@
+{
+  "artifact": "css-refusal-digest",
+  "spec_version": "0.2",
+  "revision": 1,
+  "keys": {
+    "refusal-vector-1": "../../keys/vector.pub.pem"
+  },
+  "cases": [
+    {
+      "name": "golden",
+      "file": "golden.json",
+      "expect": "pass"
+    },
+    {
+      "name": "proof-signature-bitflip",
+      "file": "proof-signature-bitflip.json",
+      "expect": "fail",
+      "failing_check": "proof"
+    },
+    {
+      "name": "refusal-ground-altered",
+      "file": "refusal-ground-altered.json",
+      "expect": "fail",
+      "failing_check": "proof",
+      "note": "the verbatim ground reworded; the proof no longer matches the canonical content"
+    },
+    {
+      "name": "event-payload-altered-resigned",
+      "file": "event-payload-altered-resigned.json",
+      "expect": "fail",
+      "failing_check": "event_hash",
+      "note": "digest re-signed by the trusted key; the per-event hash still refuses"
+    },
+    {
+      "name": "event-signature-bitflip-resigned",
+      "file": "event-signature-bitflip-resigned.json",
+      "expect": "fail",
+      "failing_check": "event_signature"
+    },
+    {
+      "name": "forbidden-event-injected-resigned",
+      "file": "forbidden-event-injected-resigned.json",
+      "expect": "fail",
+      "failing_check": "forbidden_event",
+      "note": "every hash and signature valid; the absence proof alone catches the injected transition"
+    },
+    {
+      "name": "summary-refused-miscount-resigned",
+      "file": "summary-refused-miscount-resigned.json",
+      "expect": "fail",
+      "failing_check": "summary"
+    },
+    {
+      "name": "probe-dropped-resigned",
+      "file": "probe-dropped-resigned.json",
+      "expect": "fail",
+      "failing_check": "summary",
+      "note": "an attack vanished from the record; the summary recount refuses"
+    },
+    {
+      "name": "spec-version-unknown-resigned",
+      "file": "spec-version-unknown-resigned.json",
+      "expect": "fail",
+      "failing_check": "structure"
+    },
+    {
+      "name": "ground-stripped-resigned",
+      "file": "ground-stripped-resigned.json",
+      "expect": "fail",
+      "failing_check": "structure"
+    },
+    {
+      "name": "lying-issuer-untrusted",
+      "file": "lying-issuer-untrusted.json",
+      "expect": "fail",
+      "failing_check": "proof"
+    },
+    {
+      "name": "seed-stripped-resigned",
+      "file": "seed-stripped-resigned.json",
+      "expect": "fail",
+      "failing_check": "structure",
+      "note": "a v0.2 digest requires run.seed — refused before any cryptography"
+    },
+    {
+      "name": "seed-uppercase-resigned",
+      "file": "seed-uppercase-resigned.json",
+      "expect": "fail",
+      "failing_check": "structure",
+      "note": "one canonical spelling per seed: 64 lowercase hex"
+    },
+    {
+      "name": "v01-label-smuggling-resigned",
+      "file": "v01-label-smuggling-resigned.json",
+      "expect": "fail",
+      "failing_check": "structure",
+      "note": "published versions are never mutated — a v0.1 digest must not carry a seed"
+    },
+    {
+      "name": "seed-flipped-resigned",
+      "file": "seed-flipped-resigned.json",
+      "expect": "fail",
+      "failing_check": "seed_derivation",
+      "note": "trusted re-sign over a different seed; only the derivation checks refuse a canned ledger"
+    },
+    {
+      "name": "derivation-mismatch-resigned",
+      "file": "derivation-mismatch-resigned.json",
+      "expect": "fail",
+      "failing_check": "seed_derivation",
+      "note": "aggregate id swapped and fully re-signed; the ledger does not use the seed's derived identifier"
+    },
+    {
+      "name": "ordering-violated-resigned",
+      "file": "ordering-violated-resigned.json",
+      "expect": "fail",
+      "failing_check": "seed_derivation",
+      "note": "independent staging blocks swapped against the seed's order; every event hash stays valid"
+    }
+  ]
+}
