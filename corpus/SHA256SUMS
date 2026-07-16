@@ -48,3 +48,15 @@ e3e8e14924dc0c3d4ae0f7b7f6d2b772a73d95998587ae3d31e8d89a29d39fc3  corpus/cle-v0.
 b755ac9e31281bc3a195a56746dfa30d45706328e6d452a8dca82b2e296bf4dc  corpus/cle-v0.1/r1/stream-fork.json
 d1d658b782369cd788aa146209b5de0e8d7c29294165dcd671dea2b5e4ce1466  corpus/keys/cap-vector.pub.pem
 f0ff50dacf109dea7f716d7c03eb7a821aa3a283fd3fa02f4c14dbba7d3c3322  corpus/keys/vector.pub.pem
+2ef43cd59bb3484423ae52344fee81ecfd91400467c56ec99a17e45d98cd51e6  corpus/refusal-v0.1/r1/event-payload-altered-resigned.json
+817f21b6127cd84da04ad3942a0690bc89a21f991b7f9995032aecdc0b974a48  corpus/refusal-v0.1/r1/event-signature-bitflip-resigned.json
+278d419ece69ca4b4c8a95172327e5c46a3f208194de2ce34d72fe2e7f62c1ee  corpus/refusal-v0.1/r1/forbidden-event-injected-resigned.json
+b51839b3253249db3da7f27c77f56f4a2efbcde31a76a4eb4ff05956a4c613ff  corpus/refusal-v0.1/r1/golden.json
+37a5bb02ed994144a482d69f3c794fa94cafdc6563e5ef66e9a4db990c49faed  corpus/refusal-v0.1/r1/ground-stripped-resigned.json
+de162fa8c6666607facab92640499da3964e4da74c69643b5d1c9fe41712768b  corpus/refusal-v0.1/r1/lying-issuer-untrusted.json
+49bf6ac5589683d63ca9a9db1d687929527e9041721de443cd7d6555c71cb06d  corpus/refusal-v0.1/r1/manifest.json
+48ff11657d16f97ca2c72686fcc4826e85dcb263a12baecfa87d85a4ded0a8d2  corpus/refusal-v0.1/r1/probe-dropped-resigned.json
+2532774aff68bb24ba62e4e23f4bd9da8f0f5e4126e876b645e908497b36406c  corpus/refusal-v0.1/r1/proof-signature-bitflip.json
+38633404f6f8f27ee28ce5b6b5a6898c86d87bdceedf39bfb00e98ecbd24a035  corpus/refusal-v0.1/r1/refusal-ground-altered.json
+62aaded6516c101bfa9b9d100ac707126c293b631e27223ebf187bb5eec0a8df  corpus/refusal-v0.1/r1/spec-version-unknown-resigned.json
+16e63045b693ba50bb0d177819bcaa64d7bd591d6599643f4b86a2940fa9a717  corpus/refusal-v0.1/r1/summary-refused-miscount-resigned.json
