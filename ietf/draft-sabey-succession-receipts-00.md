@@ -53,7 +53,7 @@ informative:
   I-D.farley-acta-signed-receipts:
   I-D.nelson-agent-delegation-receipts:
   I-D.rampalli-pedigree:
-  I-D.ietf-scitt-architecture:
+  RFC9943:
 
 --- abstract
 
@@ -97,7 +97,7 @@ carrying:
   recorded, embedded verbatim, so that every claim above is checkable
   against them.
 
-A relying party — an auditor, a counterparty, a regulator — verifies a
+A relying party â an auditor, a counterparty, a regulator â verifies a
 receipt **offline** with only the issuer's Ed25519 public key: no API
 call, no access to the issuing system, no trust in its operator's
 infrastructure. Verification recomputes every hash from the document's
@@ -111,8 +111,8 @@ machine-to-machine authorization decisions, and delegation receipts
 act. Per-hop delegation-chain identity, as in PEDIGREE
 {{I-D.rampalli-pedigree}}, attests how authority *flows downward* through
 live delegation from a root; Succession Receipts attest a different event
-class again — the *transfer of the authority of record itself* between
-agent generations, with obligation lineage — and are complementary to all
+class again â the *transfer of the authority of record itself* between
+agent generations, with obligation lineage â and are complementary to all
 three. The formats share primitives (Ed25519 {{RFC8032}}, JSON
 Canonicalization Scheme {{RFC8785}}) deliberately.
 
@@ -120,7 +120,12 @@ The wire format specified here is implemented and published with a
 machine-readable conformance corpus (golden vectors plus tamper cases that
 MUST fail at named checks) {{SR-REPO}}, against which independent verifier
 implementations can validate; the format steward additionally maintains a
-reference verifier, including a no-install in-browser verifier.
+reference verifier, including a no-install in-browser verifier. The same
+repository publishes companion evidence formats under the same corpus
+discipline â ledger exports, capability credentials, external anchoring
+checkpoints, and a refusal-transparency digest attesting transitions an
+agent system refused to perform â which are outside the scope of this
+document.
 
 # Conventions and Definitions
 
@@ -217,7 +222,7 @@ Each evidence event envelope carries `event_id`, `event_type`,
 `aggregate_type`, `aggregate_id`, optional `causation_id` /
 `correlation_id` / `previous_event_id` / `actor_id`, `timestamp`
 ({{RFC3339}}), `event_version`, `payload`, `event_hash`, and an optional
-`signature`. Envelopes are embedded exactly as recorded — stored bytes,
+`signature`. Envelopes are embedded exactly as recorded â stored bytes,
 not re-derived ones.
 
 # Canonicalization and Signatures {#canonical}
@@ -242,8 +247,8 @@ that digest; `signature` is the canonical signature string:
 
 `ed25519` ({{RFC8032}}, deterministic signatures) is the sole algorithm
 registered at spec versions 0.1 and 0.2. `key_id` is an issuer-managed
-label, deliberately NOT derived from the key: a verifier holds a `key_id` to
-public-key map, so key rotation adds a mapping without invalidating
+label, deliberately NOT derived from the key: a verifier holds a map from
+`key_id` to public key, so key rotation adds a mapping without invalidating
 already-issued receipts. An unrecognized `<alg>` prefix MUST be rejected;
 new algorithms (including post-quantum schemes) are additive prefixes
 registered by a new spec version, never a mutation of an existing one.
@@ -269,7 +274,7 @@ pinned out of band. Verification MUST perform, in order:
    MUST verify against it under the key named by its `key_id`. A missing
    proof, an unknown `key_id`, a hash mismatch, or a failed signature
    check is fatal. Verifying against the *recomputed* hash ensures any
-   content tampering — including of `receipt_hash` itself — fails here.
+   content tampering â including of `receipt_hash` itself â fails here.
 
 2. **Evidence integrity.** Every evidence event's hash MUST recompute to
    its stored `event_hash` per {{event-hash}}.
@@ -301,7 +306,7 @@ pinned out of band. Verification MUST perform, in order:
    of the receipt's final evidence event, and `height` states that event's
    position in the issuer's ordered stream; against a ledger export or an
    anchored checkpoint {{SR-REPO}} a relying party can additionally confirm
-   that no event at or below `height` was omitted — a completeness
+   that no event at or below `height` was omitted â a completeness
    cross-check a single receipt cannot provide alone.
 
 A conforming verifier MUST accept every golden vector and MUST reject
@@ -342,7 +347,7 @@ and resistance to retroactive truncation or rollback requires externally
 anchored commitments to the ledger head (in the style of transparency
 logs {{RFC9162}}), both published alongside this format {{SR-REPO}}. The
 anchoring extension point is designed to register ledger-head commitments
-with a SCITT transparency service {{I-D.ietf-scitt-architecture}}, so
+with a SCITT transparency service {{RFC9943}}, so
 anchoring composes with the emerging standard rather than inventing a
 parallel witness ecosystem. A version 0.2 `ledger_binding` claim states
 the evidence horizon (`height`) at which such a completeness cross-check
