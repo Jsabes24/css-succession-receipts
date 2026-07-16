@@ -42,6 +42,7 @@ they implement.
 | **CSS Ledger Export** (CLE) | [spec/ledger-export.md](./spec/ledger-export.md) | An entire ledger: every event in publication order, hash-chain linkage, signatures, every audit chain, and the issuer's completeness attestation |
 | **Capability credential** (CAP) | [spec/authorization-decisions.md](./spec/authorization-decisions.md) §2.2 | A short-lived signed capability: the issuer proof, the validity window, and that its basis is a genuine permit decision |
 | **Anchoring checkpoints** | [spec/external-anchoring.md](./spec/external-anchoring.md) | That a ledger export was not truncated or rolled back below any externally anchored head |
+| **Refusal digest** | [spec/refusal-transparency.md](./spec/refusal-transparency.md) | A standing adversarial probe run: each attack, the guard that refused it, the verbatim refusal ground, and the complete signed ledger of the attempt — in which the refused transition is provably absent |
 
 Key discovery and pinning: [spec/keyset.md](./spec/keyset.md).
 
