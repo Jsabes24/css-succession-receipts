@@ -1,0 +1,155 @@
+{
+  "artifact": "selective-disclosure-receipt",
+  "spec_version": "0.1",
+  "revision": 1,
+  "keys": {
+    "sdr-vector-1": "../../keys/vector.pub.pem"
+  },
+  "cases": [
+    {
+      "name": "golden",
+      "file": "golden.json",
+      "expect": "pass",
+      "note": "the complete SDR: every commitment opened, all seven units grounded"
+    },
+    {
+      "name": "golden-regulator",
+      "file": "golden-regulator.json",
+      "expect": "pass",
+      "note": "the §5.1 regulator projection of the SAME signed document — one signature, two projections"
+    },
+    {
+      "name": "proof-signature-bitflip",
+      "file": "proof-signature-bitflip.json",
+      "expect": "fail",
+      "failing_check": "proof",
+      "note": "signature corrupted, content untouched"
+    },
+    {
+      "name": "envelope-altered",
+      "file": "envelope-altered.json",
+      "expect": "fail",
+      "failing_check": "proof",
+      "note": "validFrom shifted; recomputed canonical hash (proof and disclosures absent) no longer matches receipt_hash"
+    },
+    {
+      "name": "lying-issuer-untrusted",
+      "file": "lying-issuer-untrusted.json",
+      "expect": "fail",
+      "failing_check": "proof",
+      "note": "attacker re-hashes and re-signs under the trusted key_id with an untrusted key"
+    },
+    {
+      "name": "proof-stripped",
+      "file": "proof-stripped.json",
+      "expect": "fail",
+      "failing_check": "proof",
+      "note": "unsigned projection"
+    },
+    {
+      "name": "salt-swapped",
+      "file": "salt-swapped.json",
+      "expect": "fail",
+      "failing_check": "disclosure_binding",
+      "note": "the salted commitment recomputes to a digest sd.claims never committed"
+    },
+    {
+      "name": "disclosure-value-altered",
+      "file": "disclosure-value-altered.json",
+      "expect": "fail",
+      "failing_check": "disclosure_binding",
+      "note": "disclosed successor scope widened without re-committing; the digest no longer binds"
+    },
+    {
+      "name": "foreign-disclosure-spliced",
+      "file": "foreign-disclosure-spliced.json",
+      "expect": "fail",
+      "failing_check": "disclosure_binding",
+      "note": "a disclosure from outside the committed evidence set"
+    },
+    {
+      "name": "duplicate-disclosure-path",
+      "file": "duplicate-disclosure-path.json",
+      "expect": "fail",
+      "failing_check": "structure",
+      "note": "one path opened twice"
+    },
+    {
+      "name": "salt-uppercase",
+      "file": "salt-uppercase.json",
+      "expect": "fail",
+      "failing_check": "structure",
+      "note": "salts are 64 lowercase hex characters"
+    },
+    {
+      "name": "unknown-disclosure-path",
+      "file": "unknown-disclosure-path.json",
+      "expect": "fail",
+      "failing_check": "structure",
+      "note": "paths are the seven claim units or evidence/\u003cevent-uuid\u003e"
+    },
+    {
+      "name": "commitments-unsorted",
+      "file": "commitments-unsorted.json",
+      "expect": "fail",
+      "failing_check": "structure",
+      "note": "commitment digests are sorted and unique; re-signed, so the wire rule itself must refuse"
+    },
+    {
+      "name": "spec-version-unknown",
+      "file": "spec-version-unknown.json",
+      "expect": "fail",
+      "failing_check": "structure",
+      "note": "verifiers reject spec_version values they do not implement"
+    },
+    {
+      "name": "evidence-tampered-hash-stale-resigned",
+      "file": "evidence-tampered-hash-stale-resigned.json",
+      "expect": "fail",
+      "failing_check": "evidence_hash",
+      "note": "compromised-key model: envelope re-signed over a re-committed tampered event; the per-event hash still refuses"
+    },
+    {
+      "name": "evidence-signature-corrupted-resigned",
+      "file": "evidence-signature-corrupted-resigned.json",
+      "expect": "fail",
+      "failing_check": "evidence_signature",
+      "note": "event hash intact but its signature is corrupt; re-committed and re-signed"
+    },
+    {
+      "name": "claim-contradicts-grant-resigned",
+      "file": "claim-contradicts-grant-resigned.json",
+      "expect": "fail",
+      "failing_check": "contradiction",
+      "note": "disclosed claim vs disclosed evidence: the grant refuses the widened scope"
+    },
+    {
+      "name": "validfrom-shifted-resigned",
+      "file": "validfrom-shifted-resigned.json",
+      "expect": "fail",
+      "failing_check": "contradiction",
+      "note": "validFrom no longer matches the disclosed completion timestamp"
+    },
+    {
+      "name": "hidden-obligation-resigned",
+      "file": "hidden-obligation-resigned.json",
+      "expect": "fail",
+      "failing_check": "contradiction",
+      "note": "a disclosed inheritance the claimed array conceals — the concealing-holder check"
+    },
+    {
+      "name": "ledger-horizon-swapped-resigned",
+      "file": "ledger-horizon-swapped-resigned.json",
+      "expect": "fail",
+      "failing_check": "version_claims",
+      "note": "no partial rule can see it; the complete projection escalates to the AHR horizon rule, which refuses"
+    },
+    {
+      "name": "active-without-validation-resigned",
+      "file": "active-without-validation-resigned.json",
+      "expect": "fail",
+      "failing_check": "claim_grounding",
+      "note": "validation event withheld from the commitment set itself; the complete projection escalates to the AHR claim rules, which refuse"
+    }
+  ]
+}
