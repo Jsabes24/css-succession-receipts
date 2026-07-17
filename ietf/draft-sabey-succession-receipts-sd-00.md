@@ -33,14 +33,9 @@ normative:
   RFC3339:
 
 informative:
-  SD-JWT:
-    title: "Selective Disclosure for JWTs (SD-JWT)"
-    target: https://datatracker.ietf.org/doc/draft-ietf-oauth-selective-disclosure-jwt/
-    date: 2025
-  SD-JWT-VC:
-    title: "SD-JWT-based Verifiable Credentials (SD-JWT VC)"
-    target: https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/
-    date: 2025
+  SD-JWT: RFC9901
+  SD-JWT-VC: I-D.ietf-oauth-sd-jwt-vc
+
   VC-DATA-MODEL:
     title: "Verifiable Credentials Data Model v2.0"
     target: https://www.w3.org/TR/vc-data-model-2.0/
