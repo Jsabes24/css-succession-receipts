@@ -123,9 +123,10 @@ implementations can validate; the format steward additionally maintains a
 reference verifier, including a no-install in-browser verifier. The same
 repository publishes companion evidence formats under the same corpus
 discipline — ledger exports, capability credentials, external anchoring
-checkpoints, and a refusal-transparency digest attesting transitions an
-agent system refused to perform — which are outside the scope of this
-document.
+checkpoints, a refusal-transparency digest attesting transitions an
+agent system refused to perform, and selective-disclosure projections of
+the receipts specified here (partial views that verify against the one
+issuer signature) — which are outside the scope of this document.
 
 # Conventions and Definitions
 
