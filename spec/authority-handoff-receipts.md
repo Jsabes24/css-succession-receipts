@@ -111,6 +111,7 @@ Integrity suite (§8 discusses interop honestly).
 | `commitments_carried` | array of UUID, optional | Every commitment inherited. Sorted lexicographically; omitted when none. |
 | `constitution` | object | **v0.2, required.** The constitutional lineage the handoff ran under: `genesis_event_hash` (the `GenesisInitialized` event hash — the lineage root every deployment has exactly one of), `amendments_ratified` (count of `AmendmentRatified` events in force at completion), and `amendment_head_hash` (event hash of the latest such amendment; omitted when the count is 0). All referenced events are carried in `evidence`, so the claim is recomputable from the receipt alone: a verifier proves not just *that* the transfer was governed but *by which* constitution. Absent on v0.1 receipts. |
 | `ledger_binding` | object | **v0.2, required.** The evidence horizon: `height` (1-based master-stream position of the receipt's final evidence event) and `event_hash` (that event's hash). Offline, the hash must match the final evidence event; against a [ledger export](./ledger-export.md) or an [anchored checkpoint](./external-anchoring.md), an auditor can additionally prove no correlated event at or below `height` was omitted — the completeness cross-check a bare evidence list cannot provide. Absent on v0.1 receipts. |
+| `authorization_binding` | object | **Optional** (additive 2026-07-20 — no `spec_version` bump, §9). The cross-format authorization binding: when the handoff itself was authorized pre-execution as a material action under an authorization-receipt format, this claim binds that exact authorization to this exact transfer. Members, all strings: `caid` — the canonical action identifier of the handoff, verbatim (byte-identical) as it appears in the authorization receipt; `receipt_hash` — lowercase-hex SHA-256 over the canonical representation of the authorization receipt, as defined by its format; `format` — the authorization-receipt format identifier, naming the canonicalization to apply (`"EP-RECEIPT-v1"`; `"EP-QUORUM-v1"` for the multi-party case). Verified per §4 step 6 when present. When absent, the receipt verifies exactly as before this claim was defined and asserts no cross-format binding — neither format absorbs the other. |
 
 ### 2.2 `evidence` — the grounding events
 
@@ -172,7 +173,7 @@ records — with the registry's event-signing Ed25519 key:
 ## 4. Verification algorithm (normative)
 
 Input: a receipt document and the issuer's Ed25519 public key(s), keyed by `key_id`.
-A verifier MUST perform all five steps; any failure invalidates the receipt.
+A verifier MUST perform all six steps; any failure invalidates the receipt.
 
 1. **Proof.** Reject if `proof` is absent. Compute the canonical bytes (§3) of the
    received document with `proof` removed; recompute `receipt_hash`; verify
@@ -196,6 +197,19 @@ A verifier MUST perform all five steps; any failure invalidates the receipt.
    generic re-serialization with re-ordered keys will not reproduce the hash).
    `correlation_id`, `causation_id`, `actor_id`, and `signature` are excluded from the
    hash by construction.
+
+   *Framing note (2026-07-20, from the first external review).* The hash input
+   concatenates adjacent variable-length fields with no length framing, so the map from
+   field tuple to hash input is not injective in general — `event_type ∥
+   aggregate_type`, two adjacent, individually unconstrained strings, is the sharp
+   boundary. Within a receipt every evidence byte is additionally covered by the issuer
+   proof (§3), but an event signature is a signature over the hash string alone and is
+   therefore reusable wherever the same hash input can be reproduced. Verifiers SHOULD
+   reject events whose `event_type` or `aggregate_type` fall outside the vocabulary the
+   issuing format publishes — the conformance corpus pins the reference vocabulary, in
+   which no two event types stand in a proper-prefix relation — and the next
+   event-format version adopts length-prefixed hash components; published versions are
+   never mutated (§9) and keep verifying under the current rule.
 3. **Evidence authenticity.** For every evidence event carrying a `signature`, verify it
    over the event's `event_hash` string with the key named by its `key_id`. A present
    but invalid signature is a failure. An absent signature is **reported, not a
@@ -236,9 +250,29 @@ A verifier MUST perform all five steps; any failure invalidates the receipt.
        hash of the **final** evidence event in canonical order; `height` is at least the
        evidence count. (The exact master-stream position is auditable against a ledger
        export or an anchored checkpoint, not from the receipt alone — §6.)
+6. **Authorization binding (optional claim).** If
+   `credentialSubject.authorization_binding` is absent, this step passes — the receipt
+   asserts no cross-format binding. If present, reject unless the claim is well-formed:
+   an object whose `caid` is a non-empty string, whose `receipt_hash` is exactly 64
+   lowercase hex characters (SHA-256 — the platform-wide convention), and whose
+   `format` is a non-empty authorization-format identifier; unknown additional members
+   are ignored (§9). A verifier that also holds the authorization receipt MUST
+   additionally recompute that receipt's canonical hash as its `format` defines and
+   reject unless the recomputed hash equals `receipt_hash` and the authorization
+   receipt's canonical action identifier equals `caid`, byte-identical. A verifier
+   without the authorization receipt performs the well-formedness check only: the
+   binding is then carried, proof-covered, for a consumer that can complete the
+   cross-check.
 
-The tamper matrix exercises each step's failure mode, including a lying issuer who
-re-signs altered content (caught by steps 2–4 even though step 1 passes).
+The tamper matrix exercises each step's failure mode. The re-signed cases model a lying
+issuer who alters content and re-signs the receipt: steps 2–4 catch every alteration
+that leaves the receipt inconsistent with its carried evidence, even though step 1
+passes. That is the precise strength of the claim — **internal consistency under the
+issuer's key**, not tamper-proofness against the issuer: an issuer who also recomputes
+evidence hashes and (holding the event-signing key, §3) re-signs the events produces an
+internally consistent receipt for a history the ledger never recorded. Exposing that
+requires the §6 instruments — the ledger itself, independently pinned event keys, or an
+externally witnessed head.
 
 ## 5. Issuance
 
@@ -261,7 +295,10 @@ Offline verification: `sr-verify receipt -receipt <file> -public-keys key_id=pat
   periodic signed checkpoints of the head): a rollback by a
   storage-privileged insider after issuance is out of the receipt's detection scope,
   though any receipt already in a counterparty's hands becomes durable evidence against
-  exactly that class of tampering.
+  exactly that class of tampering. Deployments wanting stronger-than-issuer evidence
+  SHOULD pin the event-signing key independently of the receipt-issuing key and/or
+  witness the ledger head externally — then a compromised issuer key alone can no
+  longer fabricate internally consistent evidence.
 - **Evidence subset, not chain proof.** Evidence events verify individually (hash +
   signature) but are a cross-stream subset: a receipt does not prove stream contiguity
   or completeness of the surrounding ledger. Chain-position verification is the ledger's

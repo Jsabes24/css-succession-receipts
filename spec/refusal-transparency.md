@@ -239,6 +239,16 @@ should treat it as a failure with the digest itself as the evidence.
   even fully re-signed by the issuing key. The corpus's `seed-flipped`,
   `derivation-mismatch` and `ordering-violated` cases pin this: the seed rows
   are exactly the forgeries only §4 step 5 refuses.
+- **Artifact and suite binding (future — v0.3 asks, recorded from the first
+  external review, 2026-07-19/20).** A digest proves the probes ran and were
+  refused, but binds neither *what code attacked* (no probe-suite digest) nor
+  *what build was attacked* (no engine artifact digest), so "the deployed
+  production engine was probed" rests on the operator's word even when the
+  digest verifies — the self-attestation scope above, stated from the other
+  direction. Candidate v0.3 fields: `run.suite_digest` (hash of the pinned
+  probe-suite source or binary) and `run.artifact` (engine version/commit plus
+  a binary digest or build attestation), with an independent challenger or
+  witness as the party that checks them.
 
 ## 6. Conformance
 

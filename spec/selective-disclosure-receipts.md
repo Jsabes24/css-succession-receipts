@@ -211,9 +211,10 @@ from *reported non-grounding*; step 6 applies to complete projections.
    status, and a projection profile (§5) states which statuses it promises.
 6. **Completeness escalation (§4.2).** If every digest in `sd.claims` and `sd.evidence`
    is bound by a disclosure, the projection is **complete**: the verifier MUST
-   reconstruct the full claim set and enforce the entirety of AHR §4 steps 4–5 — both
+   reconstruct the full claim set and enforce the entirety of AHR §4 steps 4–6 — both
    directions of the lineage and revocation rules ("may neither invent nor conceal"),
-   the constitution recount (5a), and the ledger binding (5b). Any failure is fatal. A
+   the constitution recount (5a), the ledger binding (5b), and the optional
+   authorization binding (step 6) when disclosed. Any failure is fatal. A
    complete projection is exactly as strong as the equivalent AHR v0.2.
 
 The pass yields a report: `receipt_hash`, per-unit statuses, disclosed/undisclosed
