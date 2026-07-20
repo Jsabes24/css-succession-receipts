@@ -25,7 +25,7 @@ proofs below make each of them tamper-evident.
   fingerprints every vector. Published revisions are immutable — a revision is
   a new directory, never an edit — so those checksums are a permanent
   fingerprint of the r1 vectors.
-- **Internet-Draft.** `draft-sabey-succession-receipts-00` is filed to the IETF
+- **Internet-Draft.** `draft-sabey-succession-receipts` is filed to the IETF
   Datatracker, which publishes a world-readable, permanently archived,
   timestamped, attributed record. It is the single strongest priority anchor.
 
