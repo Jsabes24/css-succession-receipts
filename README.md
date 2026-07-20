@@ -76,12 +76,12 @@ program for third-party verifier implementations (mark reserved — see
 form — citable, venue-appropriate statements of the formats and their verification
 algorithms, each derived from the spec of the same name:
 
-- **`draft-sabey-succession-receipts-00`** — the authority-handoff receipt (AHR):
+- **`draft-sabey-succession-receipts`** — the authority-handoff receipt (AHR):
   offline-verifiable evidence of succession with bidirectional claim grounding.
-- **`draft-sabey-refusal-transparency-00`** — the refusal digest (v0.1 and the
+- **`draft-sabey-refusal-transparency`** — the refusal digest (v0.1 and the
   seeded, replay-resistant v0.2): signed evidence of the transitions the governing
   system refused.
-- **`draft-sabey-succession-receipts-sd-00`** — selective disclosure for succession
+- **`draft-sabey-succession-receipts-sd`** — selective disclosure for succession
   receipts: the SD-JWT salted-commitment discipline applied to the receipt as a
   plain-JSON/JCS document, so one signature serves per-audience projections.
 
