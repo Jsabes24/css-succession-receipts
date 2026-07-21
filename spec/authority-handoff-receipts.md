@@ -111,7 +111,7 @@ Integrity suite (§8 discusses interop honestly).
 | `commitments_carried` | array of UUID, optional | Every commitment inherited. Sorted lexicographically; omitted when none. |
 | `constitution` | object | **v0.2, required.** The constitutional lineage the handoff ran under: `genesis_event_hash` (the `GenesisInitialized` event hash — the lineage root every deployment has exactly one of), `amendments_ratified` (count of `AmendmentRatified` events in force at completion), and `amendment_head_hash` (event hash of the latest such amendment; omitted when the count is 0). All referenced events are carried in `evidence`, so the claim is recomputable from the receipt alone: a verifier proves not just *that* the transfer was governed but *by which* constitution. Absent on v0.1 receipts. |
 | `ledger_binding` | object | **v0.2, required.** The evidence horizon: `height` (1-based master-stream position of the receipt's final evidence event) and `event_hash` (that event's hash). Offline, the hash must match the final evidence event; against a [ledger export](./ledger-export.md) or an [anchored checkpoint](./external-anchoring.md), an auditor can additionally prove no correlated event at or below `height` was omitted — the completeness cross-check a bare evidence list cannot provide. Absent on v0.1 receipts. |
-| `authorization_binding` | object | **Optional** (additive 2026-07-20 — no `spec_version` bump, §9). The cross-format authorization binding: when the handoff itself was authorized pre-execution as a material action under an authorization-receipt format, this claim binds that exact authorization to this exact transfer. Members, all strings: `caid` — the canonical action identifier of the handoff, verbatim (byte-identical) as it appears in the authorization receipt; `receipt_hash` — lowercase-hex SHA-256 over the canonical representation of the authorization receipt, as defined by its format; `format` — the authorization-receipt format identifier, naming the canonicalization to apply (`"EP-RECEIPT-v1"`; `"EP-QUORUM-v1"` for the multi-party case). Verified per §4 step 6 when present. When absent, the receipt verifies exactly as before this claim was defined and asserts no cross-format binding — neither format absorbs the other. |
+| `authorization_binding` | object | **Optional** (additive 2026-07-20 — no `spec_version` bump, §9). The cross-format authorization binding: when the handoff itself was authorized pre-execution as a material action under an authorization-receipt format, this claim binds that exact authorization to this exact transfer. Members, all strings: `caid` — the canonical action identifier of the handoff, verbatim (byte-identical) as the named format defines it — a native member or a value derived from the verified receipt under the format's pinned mapping profile; `receipt_hash` — lowercase-hex SHA-256 over the canonical representation of the authorization receipt, as defined by its format; `format` — the authorization-receipt format identifier, naming the canonicalization to apply (`"EP-RECEIPT-v1"`; `"EP-QUORUM-v1"` for the multi-party case). Verified per §4 step 6 when present. When absent, the receipt verifies exactly as before this claim was defined and asserts no cross-format binding — neither format absorbs the other. |
 
 ### 2.2 `evidence` — the grounding events
 
@@ -259,7 +259,11 @@ A verifier MUST perform all six steps; any failure invalidates the receipt.
    are ignored (§9). A verifier that also holds the authorization receipt MUST
    additionally recompute that receipt's canonical hash as its `format` defines and
    reject unless the recomputed hash equals `receipt_hash` and the authorization
-   receipt's canonical action identifier equals `caid`, byte-identical. A verifier
+   receipt's canonical action identifier — a native member or a derived value, as the
+   named format defines — equals `caid`, byte-identical. The recomputed hash is
+   evaluated before the identifier comparison; the conformance corpus pins this order
+   with cross-format vectors contributed by the authorization-format author
+   ([`corpus/ahr-v0.2/r2/`](../corpus/ahr-v0.2/r2/manifest.json)). A verifier
    without the authorization receipt performs the well-formedness check only: the
    binding is then carried, proof-covered, for a consumer that can complete the
    cross-check.

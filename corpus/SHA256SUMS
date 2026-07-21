@@ -100,3 +100,11 @@ c77efb360140c09a93a55a90399548048d7c8f0632432c6c7dfa57bd2ffea887  corpus/sdr-v0.
 0b9e5fde509c42f1c1d141a8b68ddefd387f489b3ba730ddc42f98d6e4f8b1b6  corpus/sdr-v0.1/r1/spec-version-unknown.json
 ea730664b6285168f49c0fe9946772fafd93e965f31778bfcf62d012d1552e46  corpus/sdr-v0.1/r1/unknown-disclosure-path.json
 5dd1968e371eae1712b1fc47c99390bcbf47a4ae03394891278ea1c3ae2535ec  corpus/sdr-v0.1/r1/validfrom-shifted-resigned.json
+141df6bca19854929f243a5915324ab37efc706c83a9a1551232cfbe138ea90e  corpus/ahr-v0.2/r2/authorization-receipt-material-changed.json
+7e9fd718236797d99d7aa23989996cc81f34b355f9962b71419320e4cc45d7e6  corpus/ahr-v0.2/r2/authorization-receipt.json
+e3a707f3bdf41a64e8e11a103b3d782b6816d14f65caed6f252dd38f6f3c4c70  corpus/ahr-v0.2/r2/binding-absent.json
+e3866df76f5f3140b019f0ed0a169da66889cc535de0d1b80dcf8a9545164385  corpus/ahr-v0.2/r2/binding-caid-mismatch.json
+48cdb1a8b3bb0e2f1dbac4418d18ffaa0505bf7213934ba4715dcbd58edc9734  corpus/ahr-v0.2/r2/binding-receipt-hash-mismatch.json
+3cf69b332f06a3692538ca315120cfe79ac58c4bb2d011fac7c9e937714276c2  corpus/ahr-v0.2/r2/cross-format-vector.json
+1a40f0ef444ef1e0017ba30353a777ac2a513cd8b11c7bbe5bd35dd8e65f980e  corpus/ahr-v0.2/r2/golden-binding.json
+4d12c6c5c6435090c583738ca14181239733f34b1cac5fb6dc7cb4c807f12912  corpus/ahr-v0.2/r2/manifest.json

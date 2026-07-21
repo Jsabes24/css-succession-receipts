@@ -1,0 +1,54 @@
+{
+  "artifact": "authority-handoff-receipt",
+  "spec_version": "0.2",
+  "revision": 2,
+  "keys": {
+    "ahr-vector-1": "../../keys/vector.pub.pem"
+  },
+  "cases": [
+    {
+      "name": "binding-present-verifies",
+      "file": "golden-binding.json",
+      "expect": "pass",
+      "note": "positive cross-format binding: recomputed canonical hash and derived CAID both match; vector contributed by the EP-RECEIPT-v1 author (I. Schrock, EMILIA Protocol) and independently reproduced",
+      "authorization_receipt": "authorization-receipt.json"
+    },
+    {
+      "name": "binding-well-formed-without-authorization-receipt",
+      "file": "golden-binding.json",
+      "expect": "pass",
+      "note": "without the authorization receipt as input, step 6 verifies well-formedness only; the binding is carried, proof-covered, for a consumer that can complete the cross-check"
+    },
+    {
+      "name": "binding-receipt-hash-mismatch",
+      "file": "binding-receipt-hash-mismatch.json",
+      "expect": "fail",
+      "failing_check": "authorization_binding",
+      "note": "claimed receipt_hash does not match the recomputed canonical hash of the authorization receipt",
+      "authorization_receipt": "authorization-receipt.json"
+    },
+    {
+      "name": "binding-caid-mismatch",
+      "file": "binding-caid-mismatch.json",
+      "expect": "fail",
+      "failing_check": "authorization_binding",
+      "note": "claimed caid does not match the identifier derived from the verified Action Object under the pinned jcs-sha256 mapping",
+      "authorization_receipt": "authorization-receipt.json"
+    },
+    {
+      "name": "binding-changed-receipt-material",
+      "file": "golden-binding.json",
+      "expect": "fail",
+      "failing_check": "authorization_binding",
+      "note": "material Action Object change: the recomputed canonical hash diverges (evaluated before the identifier comparison)",
+      "authorization_receipt": "authorization-receipt-material-changed.json"
+    },
+    {
+      "name": "binding-absent-does-not-invalidate",
+      "file": "binding-absent.json",
+      "expect": "pass",
+      "note": "absent optional binding leaves the succession receipt valid, asserting no cross-format binding",
+      "authorization_receipt": "authorization-receipt.json"
+    }
+  ]
+}
