@@ -21,13 +21,8 @@ proofs below make each of them tamper-evident.
 - **Content addressing.** Every file is fixed by its Git object hash, and the
   root commit hash covers the whole tree. Publishing that commit publicly is
   itself a dated, third-party-witnessed record.
-- **Conformance corpus checksums.** [`corpus/SHA256SUMS`](./corpus/SHA256SUMS)
-  fingerprints every vector. Published revisions are immutable — a revision is
-  a new directory, never an edit — so those checksums are a permanent
-  fingerprint of the r1 vectors.
-- **Internet-Draft.** `draft-sabey-succession-receipts` is filed to the IETF
-  Datatracker, which publishes a world-readable, permanently archived,
-  timestamped, attributed record. It is the single strongest priority anchor.
+- **Conformance corpus checksums.** corpus/SHA256SUMS fingerprints every vector. Published revisions are immutable  a revision is a new directory, never an edit  so the manifest only ever grows, and each state’s checksums are a permanent fingerprint of the vectors published to that point. The in-tree corpus/SHA256SUMS.ots is re-stamped in place as the corpus is extended; the root-level SHA256SUMS.ots is the original v0.1.1-era stamp, kept in place for lineage.
+- **Internet-Draft.** draft-sabey-succession-receipts and its two companions (draft-sabey-succession-receipts-sd, draft-sabey-refusal-transparency) are filed to the IETF Datatracker, which publishes a world-readable, permanently archived, timestamped, attributed record. They are the single strongest priority anchor.
 
 ## Release provenance (per tagged version)
 
@@ -72,18 +67,7 @@ The three release assets — `SHA256SUMS`, `SHA256SUMS.sigstore.json`, and
 `SHA256SUMS.ots` — all correspond byte-for-byte to the in-tree
 [`corpus/SHA256SUMS`](./corpus/SHA256SUMS).
 
-**Version numbering.** This repository's first release is v0.1.1 v0.1.2 is a 
-Documentation-only patch: it lowercases the jsabes24 casing in the
-internet-Draft's refrence URLs and changes nothing under corpus/,so its
-SHA256SUMS (df3b122f,,,cf00e44) is bye-identical to v0.1.1's and is 
-already anchored by the same Bitcoin timestamp. Its tag was minted by
-the release workflow's dispatch path and is therefore a lightweight,
-unsigned tag-unlike the SSH-signed v0.1.1 tag above; future releases
-should be cut from a signed annotated tag to preserve the signed tag
-guarantee, The v0.1.0 and v0.2.0 tag names were used by a superseded lineage
-of this repository and are permanently retired under Github's immuutable-release
-guarante; the wire-format spec version (0.1) and the r1 corpus vectors are 
-unchanged.
+**Version numbering.** This repository’s first release is v0.1.1. The v0.1.2 number was consumed by the release workflow’s dispatch path and its tag retired unused. v0.1.3 is a documentation only release: it lowercases the jsabes24 casing in the Internet-Draft’s reference URLs and changes nothing under corpus/, so its SHA256SUMS (df3b122f…cf00e44) is byte-identical to v0.1.1’s and is already anchored by the same Bitcoin timestamp. Its tag was minted by the release workflow’s dispatch path and is therefore a lightweight, unsigned tag  unlike the SSH-signed v0.1.1 tag above; future releases should be cut from a signed annotated tag to preserve the signed-tag guarantee. The v0.1.0 and v0.2.0 tag names were used by a superseded lineage of this repository and are permanently retired under GitHub’s immutable-release guarantee; the wire-format spec versions and the published corpus vectors are unchanged.
 
 **Why both a transparency log and OpenTimestamps.** The log gives an immediate,
 machine-checkable entry tied to the signing identity; OpenTimestamps gives an
@@ -115,8 +99,4 @@ priority claim ever resting on a log we run.
   repository is public, for a durable and citable copy.
 
 ## Not done, on purpose (v0.1)
-
-The corpus is committed to be byte-identical to the published r1 vectors, so
-it carries no embedded provenance markers; adding any would break that
-immutability promise. A watermarking scheme, if ever wanted, belongs to a future
-corpus revision — never a re-edit of a published one.
+The corpus is committed to be byte-identical to its published vectors in every revision, so it carries no embedded provenance markers;adding any would break that immutability promise. A watermarking scheme, if ever wanted, belongs to a future corpus revision — never a re-edit of a published one.
