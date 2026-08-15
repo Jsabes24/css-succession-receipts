@@ -1,0 +1,52 @@
+{
+  "artifact": "precommitment-atom",
+  "spec_version": "0.1",
+  "revision": 1,
+  "keys": {
+    "precommit-vector-1": "../../keys/precommit-vector.pub.pem"
+  },
+  "cases": [
+    {
+      "name": "golden-met",
+      "file": "golden.json",
+      "expect": "pass",
+      "evidence": "evidence-met.json",
+      "resolution": "met"
+    },
+    {
+      "name": "golden-not-met",
+      "file": "golden.json",
+      "expect": "pass",
+      "evidence": "evidence-not-met.json",
+      "resolution": "not_met"
+    },
+    {
+      "name": "tamper-proof",
+      "file": "tamper-proof.json",
+      "expect": "fail",
+      "failing_check": "proof",
+      "note": "content changed after signing"
+    },
+    {
+      "name": "tamper-unsigned",
+      "file": "tamper-unsigned.json",
+      "expect": "fail",
+      "failing_check": "proof",
+      "note": "proof removed"
+    },
+    {
+      "name": "tamper-confidence",
+      "file": "tamper-confidence.json",
+      "expect": "fail",
+      "failing_check": "malformed",
+      "note": "validly signed, confidence out of [0,1]"
+    },
+    {
+      "name": "tamper-method",
+      "file": "tamper-method.json",
+      "expect": "fail",
+      "failing_check": "unknown_method",
+      "note": "validly signed, unregistered method"
+    }
+  ]
+}

@@ -44,8 +44,14 @@ they implement.
 | **Anchoring checkpoints** | [spec/external-anchoring.md](./spec/external-anchoring.md) | That a ledger export was not truncated or rolled back below any externally anchored head |
 | **Refusal digest** | [spec/refusal-transparency.md](./spec/refusal-transparency.md) | A standing adversarial probe run: each attack, the guard that refused it, the verbatim refusal ground, and the complete signed ledger of the attempt — in which the refused transition is provably absent. v0.2 seeds every run so its staged identities are recomputable and a replayed ledger cannot match |
 | **Selective-disclosure receipt** (SDR) | [spec/selective-disclosure-receipts.md](./spec/selective-disclosure-receipts.md) | A per-audience projection of one signed handoff receipt: salted per-claim commitments let a holder reveal a subset — a regulator, a counterparty, and the public each verify a different view against the one issuer signature — while withholding never breaks the proof and what is withheld stays visibly committed |
+| **Precommitment atom** | [spec/precommitment-atoms.md](./spec/precommitment-atoms.md) | That a question and the rule resolving it were fixed *before* the outcome was known — never the answer. The verdict is re-executed from the atom's own public rule, so anyone recomputes the same `met` / `not_met` / `indeterminate`; anchoring makes existence-before-outcome externally checkable |
+| **Seat evidence** | [spec/seat-evidence.md](./spec/seat-evidence.md) | What a model seat answered, what answered it (weights and template by digest), what it was calibrated on, and **whether it certifies at all** — with a `fidelity_ceiling` that every verifier re-derives, so a seat cannot overstate what its own stance is worth |
 
 Key discovery and pinning: [spec/keyset.md](./spec/keyset.md).
+
+The last two are about **model output** rather than about the record, which makes this family
+relevant to anyone evaluating model claims — not only to authority succession. A third party
+can build a conforming seat from the spec and corpus alone, without touching any engine.
 
 ## Verify CSS evidence today
 

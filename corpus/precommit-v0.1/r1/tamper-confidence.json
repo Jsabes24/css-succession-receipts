@@ -1,0 +1,26 @@
+{
+  "spec": "css-precommitment",
+  "spec_version": "0.1",
+  "issuer": "urn:css:registry",
+  "id": "00000000-0000-4000-8000-00000000a70a",
+  "claim": "model X reaches at least 0.9 accuracy on the frozen test set by the horizon",
+  "confidence": "1.5",
+  "measurement": {
+    "method": "numeric-threshold",
+    "params": {
+      "field": "accuracy",
+      "op": "\u003e=",
+      "threshold": "0.9"
+    }
+  },
+  "horizon": "2027-01-01T00:00:00Z",
+  "update_rule": "resolved when the eval harness reports accuracy on the frozen test set",
+  "created_at": "2026-07-24T00:00:00Z",
+  "proof": {
+    "type": "CSSEd25519Signature",
+    "created": "2026-07-24T00:00:00Z",
+    "verification_method": "precommit-vector-1",
+    "precommitment_hash": "1b7bc007302483364bd2b76aaaef14101f8a8efefea4980de7c782c5bb4b896b",
+    "signature": "ed25519:precommit-vector-1:9wm_1zqSmcpuvKKiy4dwU8tH2EsCtZ9cpLGZsDUoQoqq_-J374UsLzZ1lZqIwRIIdZhBYKErEk27vcAxJrQbAg"
+  }
+}

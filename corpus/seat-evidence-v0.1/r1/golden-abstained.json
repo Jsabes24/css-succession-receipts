@@ -1,0 +1,39 @@
+{
+  "spec": "css-seat-evidence",
+  "spec_version": "0.1",
+  "issuer": "urn:css:registry",
+  "id": "00000000-0000-4000-8000-000000005ea3",
+  "subject": {
+    "chain_id": "00000000-0000-4000-8000-0000000000c1",
+    "question": "does the proposed succession preserve constitutional continuity?",
+    "evaluation_type": "Succession"
+  },
+  "stance": {
+    "abstained": true
+  },
+  "calibration": {
+    "certifies": true,
+    "alpha": "0.05",
+    "corpus": {
+      "tree": "cle-v0.1/r1",
+      "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "abstention_rate": "0.41",
+    "error_rate_asserted": "0.07",
+    "sample_size": 512
+  },
+  "seat": {
+    "weights_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+    "template_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+    "template_id": "seat-prompt-v3"
+  },
+  "fidelity_ceiling": "FD0",
+  "created_at": "2026-08-15T00:00:00Z",
+  "proof": {
+    "type": "CSSEd25519Signature",
+    "created": "2026-08-15T00:00:00Z",
+    "verification_method": "seat-vector-1",
+    "evidence_hash": "76015a9733013a6ad49512fb5defc0d535cd95b7838c21cf0735229613dcfb61",
+    "signature": "ed25519:seat-vector-1:CAA8BuXdxPWC2TNla1mfxUZpb5MrbpirFEYRamAf0TjoCTmXwczEBgvau67evyDkUZVslUEqc0sivsAroMO_BQ"
+  }
+}

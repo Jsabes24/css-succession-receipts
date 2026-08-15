@@ -1,0 +1,98 @@
+{
+  "artifact": "seat-evidence",
+  "spec_version": "0.1",
+  "revision": 1,
+  "keys": {
+    "seat-vector-1": "../../keys/seat-vector.pub.pem"
+  },
+  "cases": [
+    {
+      "name": "golden-not-certifying",
+      "file": "golden-not-certifying.json",
+      "expect": "pass",
+      "note": "the honest current state: a real stance with certifies:false, ceiling FD0"
+    },
+    {
+      "name": "golden-certifying",
+      "file": "golden-certifying.json",
+      "expect": "pass",
+      "note": "certifies at alpha; ceiling FD2 and never higher"
+    },
+    {
+      "name": "golden-abstained",
+      "file": "golden-abstained.json",
+      "expect": "pass",
+      "note": "explicit signed abstention by a certifying seat; ceiling falls to FD0"
+    },
+    {
+      "name": "golden-precommitment-bound",
+      "file": "golden-precommitment-bound.json",
+      "expect": "pass",
+      "note": "calibration bound to a precommitment atom; cross-check passes when the verifier holds it",
+      "atom": "9f2c3a1b8e7d6c5b4a39281706f5e4d3c2b1a09f8e7d6c5b4a39281706f5e4d3"
+    },
+    {
+      "name": "binding-well-formed-without-atom",
+      "file": "golden-precommitment-bound.json",
+      "expect": "pass",
+      "note": "without the atom as input the binding verifies for well-formedness only — absence of the artifact is never an error"
+    },
+    {
+      "name": "binding-atom-mismatch",
+      "file": "golden-precommitment-bound.json",
+      "expect": "fail",
+      "failing_check": "precommitment_binding",
+      "note": "verifier holds a different atom than the one bound",
+      "atom": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "tamper-ceiling-self-promoted",
+      "file": "tamper-ceiling-self-promoted.json",
+      "expect": "fail",
+      "failing_check": "fidelity_ceiling",
+      "note": "validly re-signed by the issuer: a non-certifying seat claiming FD4. The signature is genuine; the claim is not"
+    },
+    {
+      "name": "tamper-ceiling-above-cap",
+      "file": "tamper-ceiling-above-cap.json",
+      "expect": "fail",
+      "failing_check": "fidelity_ceiling",
+      "note": "a certifying seat claiming FD3, above the FD2 cap"
+    },
+    {
+      "name": "tamper-proof",
+      "file": "tamper-proof.json",
+      "expect": "fail",
+      "failing_check": "proof",
+      "note": "stance changed after signing"
+    },
+    {
+      "name": "tamper-unsigned",
+      "file": "tamper-unsigned.json",
+      "expect": "fail",
+      "failing_check": "proof",
+      "note": "proof removed"
+    },
+    {
+      "name": "tamper-abstained-with-distribution",
+      "file": "tamper-abstained-with-distribution.json",
+      "expect": "fail",
+      "failing_check": "malformed",
+      "note": "validly signed; abstention and distribution are mutually exclusive"
+    },
+    {
+      "name": "tamper-certifies-without-alpha",
+      "file": "tamper-certifies-without-alpha.json",
+      "expect": "fail",
+      "failing_check": "malformed",
+      "note": "validly signed; certifying requires a stated alpha"
+    },
+    {
+      "name": "tamper-corpus-not-published",
+      "file": "tamper-corpus-not-published.json",
+      "expect": "fail",
+      "failing_check": "malformed",
+      "note": "validly signed; an opaque calibration set is unfalsifiable, so the tree must name a published revision"
+    }
+  ]
+}
