@@ -19,6 +19,30 @@ directory; published files are never edited. Vector keys derive from published t
 seeds (they exist so cases like a lying issuer re-signing altered content can be
 expressed) — they are test constants, not secrets, and secure nothing.
 
+**Reference material may be added to a revision; results may not be changed.** The
+rule above forbids editing a published file and ties a new revision to new engine
+behavior. A file that no case references, that changes no expected result and that
+leaves every published byte identical is neither of those things, and cutting an
+`rN+1` whose cases and verdicts are byte-identical to `rN` would announce a
+behavior change that did not happen. Two revisions carry such material today:
+
+- `ahr-v0.2/r2/cross-format-vector.json` — the contributed cross-format fixture,
+  verbatim, carrying its own `caid_derivation` block.
+- `ahr-v0.2/r3/cross-format-vector-{1of1,2of3}.json` and
+  `ahr-v0.2/r3/caid-derivation.json` — the contributed native artifacts, verbatim,
+  and the derivation of r3's published `caid` and `receipt_hash` values.
+
+The r3 files were added after r3 was first published, and the reason is worth
+recording rather than smoothing over: the contributed native artifacts carry only
+the receipt and the claim, with no `caid_derivation` block of the kind r2's fixture
+carried, and the mapping profile those values were generated under lived only in
+the test sources of repositories that are not published. A relying party could read
+r3's claimed identifiers and had no published way to reproduce them. That is a
+conformance corpus failing at the one thing it exists for.
+
+Adding them re-stamps `SHA256SUMS`, which every change to this tree does. No case
+was added, no expected result moved, and no manifest was touched.
+
 ## Manifest format
 
 ```json

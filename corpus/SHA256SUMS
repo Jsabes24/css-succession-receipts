@@ -1,4 +1,4 @@
-36c89420bded90f07f853cabb5391dcc9882b9932b1482c961ed16d1b483f931  corpus/README.md
+f886e24bbc735acb6a93f8b3a0584d66fc4cbc6426d9481dc8bdb4a424376331  corpus/README.md
 da2252e409f8e6905ce4c4fc569af27e973f8e3df28fc438a9ac7c59acd4d5e9  corpus/ahr-v0.1/r1/claim-hidden-obligation.json
 2296a97d2d706ce2fc4807de792088501d8b7effe2d38ab07343978d0e378260  corpus/ahr-v0.1/r1/claim-invented-obligation.json
 940577230c1cdb0b3625cb51a84d5f54f886bbd480177b7d0e4861dd86fd2a6d  corpus/ahr-v0.1/r1/content-altered.json
@@ -43,6 +43,9 @@ e3a707f3bdf41a64e8e11a103b3d782b6816d14f65caed6f252dd38f6f3c4c70  corpus/ahr-v0.
 a6f38e2d67f8c713802610dbda7ecde3fe68ed7f68ca57f21d255a584b112e63  corpus/ahr-v0.2/r3/binding-caid-mismatch.json
 0f9d03a460dc3911a09a05755b2758ec4cb833ed55a45323a83f08be0efa6b35  corpus/ahr-v0.2/r3/binding-quorum-suite-named-as-format.json
 2af627eac6987d7fc7704960ddc5733d511ba8642f767c76300eab04c8966685  corpus/ahr-v0.2/r3/binding-receipt-hash-mismatch.json
+84a5106f943c040ff45f1914db40ff3e078f4a05018d7c7e05c94d7d7ed5fac1  corpus/ahr-v0.2/r3/caid-derivation.json
+7c7392e06c32919a090fa15be3f6e687422156b8b3c35f4c79b9a2a56b4023c6  corpus/ahr-v0.2/r3/cross-format-vector-1of1.json
+a052b1ed1c9281a32bb4cf5a62cca73561610aef7c08d2083e923c64e2c2e695  corpus/ahr-v0.2/r3/cross-format-vector-2of3.json
 d39ada1e5386fe7602f1709a24c2f90b39e4df236c4130b2b2ff1514a9323f0f  corpus/ahr-v0.2/r3/golden-binding-1of1.json
 7183cea9c71a3729619273f14b5fe3108aa81dc5eeb05cdecb8526f3780a5da8  corpus/ahr-v0.2/r3/golden-binding-2of3.json
 d06267dc062556cffd224041da20c497bce54193d7d32d92774d6356fc8d393f  corpus/ahr-v0.2/r3/manifest.json

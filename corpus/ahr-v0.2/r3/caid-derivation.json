@@ -1,0 +1,110 @@
+{
+  "description": "How r3's published caid and receipt_hash values were derived, so that a relying party can reproduce every one of them from the bytes in this directory alone. r2 carried this inside its contributed cross-format vector; r3's contributed artifacts carry only the receipt and the claim, so the derivation had no published home and this file is it. Added after r3 was first published. No file published with r3 is edited by its presence: no case references it, no expected result changes, and the manifest is untouched.",
+  "canonicalization": "RFC 8785 JSON Canonicalization Scheme",
+  "order": "Native verification first, then the complete-artifact digest, then the derived identifier. The order is load-bearing twice: the digest precedes the identifier so a tampered artifact is reported as a changed artifact rather than a mismatched action, and native verification precedes both so no digest is ever compared against bytes not shown to be genuine. This file documents the last two steps; the first belongs to the authorization-receipt format and is not performed by this corpus.",
+  "mapping_profile_is_an_input": {
+    "what": "The profile below is pinned by the relying party. It is NOT read out of the artifact being judged.",
+    "why": "A document that supplied the mapping by which it is measured would be choosing its own verdict. The profile is published here as the one these vectors were generated under, so the values reproduce; it is not a claim that any other deployment must pin the same one."
+  },
+  "mapping_profile": {
+    "target_action_type": "succession.transfer-fixture.1",
+    "loss_policy": "no-material-field-loss",
+    "rules": [
+      {
+        "source_path": "/action",
+        "target_field": "native_action",
+        "transform": "copy"
+      }
+    ]
+  },
+  "vectors": {
+    "1of1": {
+      "contributed_vector": "cross-format-vector-1of1.json",
+      "authorization_receipt": "authorization-receipt-1of1.json",
+      "golden_receipt": "golden-binding-1of1.json",
+      "receipt_hash_derivation": {
+        "over": "the complete, unchanged authorization receipt, INCLUDING log_proof and approver_key_proofs",
+        "not": "the native log leaf digest, which excludes exactly those two members; a verifier that hashed the leaf instead would still agree with a well-formed receipt, which is why this revision carries authorization-receipt-log-proof-mutated.json and authorization-receipt-approver-proofs-mutated.json",
+        "digest_algorithm": "SHA-256 over the UTF-8 JCS bytes",
+        "digest_hex": "98253d32649c9f3df43734edb836e04285b5ddd9c260735e95169de4bdafc23b"
+      },
+      "caid_derivation": {
+        "mapped_action_object": {
+          "action_type": "succession.transfer-fixture.1",
+          "native_action": {
+            "ep_version": "1.0",
+            "action_type": "succession.transfer",
+            "target": {
+              "system": "succession.example",
+              "resource": "work/refunds-17"
+            },
+            "parameters": {
+              "subject": "urn:example:work:refunds-17",
+              "from": "did:example:worker-old",
+              "to": "did:example:worker-new",
+              "scope": {
+                "permission": "refund.prepare",
+                "max_amount": "50.00",
+                "currency": "USD"
+              }
+            },
+            "initiator": "did:example:delegation-owner",
+            "policy_id": "urn:example:jaryn-r3:basic-1of1",
+            "requested_at": "2026-09-17T12:00:00Z"
+          }
+        },
+        "canonical_mapped_action_object_utf8": "{\"action_type\":\"succession.transfer-fixture.1\",\"native_action\":{\"action_type\":\"succession.transfer\",\"ep_version\":\"1.0\",\"initiator\":\"did:example:delegation-owner\",\"parameters\":{\"from\":\"did:example:worker-old\",\"scope\":{\"currency\":\"USD\",\"max_amount\":\"50.00\",\"permission\":\"refund.prepare\"},\"subject\":\"urn:example:work:refunds-17\",\"to\":\"did:example:worker-new\"},\"policy_id\":\"urn:example:jaryn-r3:basic-1of1\",\"requested_at\":\"2026-09-17T12:00:00Z\",\"target\":{\"resource\":\"work/refunds-17\",\"system\":\"succession.example\"}}}",
+        "suite": "jcs-sha256",
+        "digest_algorithm": "SHA-256 over the UTF-8 bytes of canonical_mapped_action_object_utf8",
+        "domain_separation": "none",
+        "digest_hex": "98f7a919fc05fb63a4bc4e170f9f3c20a690fa0a09959ac782b13cec7f3dade8",
+        "digest_base64url_unpadded": "mPepGfwF-2OkvE4XD588IKaQ-goJlZrHgrE87H89reg",
+        "caid": "caid:1:succession.transfer-fixture.1:jcs-sha256:mPepGfwF-2OkvE4XD588IKaQ-goJlZrHgrE87H89reg"
+      }
+    },
+    "2of3": {
+      "contributed_vector": "cross-format-vector-2of3.json",
+      "authorization_receipt": "authorization-receipt-2of3.json",
+      "golden_receipt": "golden-binding-2of3.json",
+      "receipt_hash_derivation": {
+        "over": "the complete, unchanged authorization receipt, INCLUDING log_proof and approver_key_proofs",
+        "not": "the native log leaf digest, which excludes exactly those two members; a verifier that hashed the leaf instead would still agree with a well-formed receipt, which is why this revision carries authorization-receipt-log-proof-mutated.json and authorization-receipt-approver-proofs-mutated.json",
+        "digest_algorithm": "SHA-256 over the UTF-8 JCS bytes",
+        "digest_hex": "8330b43bb3b433e4d0987883ddeaf619170bc5cdadc6f09f154ce7b02aa9be3b"
+      },
+      "caid_derivation": {
+        "mapped_action_object": {
+          "action_type": "succession.transfer-fixture.1",
+          "native_action": {
+            "ep_version": "1.0",
+            "action_type": "succession.transfer",
+            "target": {
+              "system": "succession.example",
+              "resource": "work/refunds-17"
+            },
+            "parameters": {
+              "subject": "urn:example:work:refunds-17",
+              "from": "did:example:worker-old",
+              "to": "did:example:worker-new",
+              "scope": {
+                "permission": "refund.prepare",
+                "max_amount": "50.00",
+                "currency": "USD"
+              }
+            },
+            "initiator": "did:example:delegation-owner",
+            "policy_id": "urn:example:jaryn-r3:basic-2of3",
+            "requested_at": "2026-09-17T12:00:00Z"
+          }
+        },
+        "canonical_mapped_action_object_utf8": "{\"action_type\":\"succession.transfer-fixture.1\",\"native_action\":{\"action_type\":\"succession.transfer\",\"ep_version\":\"1.0\",\"initiator\":\"did:example:delegation-owner\",\"parameters\":{\"from\":\"did:example:worker-old\",\"scope\":{\"currency\":\"USD\",\"max_amount\":\"50.00\",\"permission\":\"refund.prepare\"},\"subject\":\"urn:example:work:refunds-17\",\"to\":\"did:example:worker-new\"},\"policy_id\":\"urn:example:jaryn-r3:basic-2of3\",\"requested_at\":\"2026-09-17T12:00:00Z\",\"target\":{\"resource\":\"work/refunds-17\",\"system\":\"succession.example\"}}}",
+        "suite": "jcs-sha256",
+        "digest_algorithm": "SHA-256 over the UTF-8 bytes of canonical_mapped_action_object_utf8",
+        "domain_separation": "none",
+        "digest_hex": "56c55770d137e25d43fd258b4ea2a2551ea48c28484e45faab5943b5226f0685",
+        "digest_base64url_unpadded": "VsVXcNE34l1D_SWLTqKiVR6kjChITkX6q1lDtSJvBoU",
+        "caid": "caid:1:succession.transfer-fixture.1:jcs-sha256:VsVXcNE34l1D_SWLTqKiVR6kjChITkX6q1lDtSJvBoU"
+      }
+    }
+  }
+}
