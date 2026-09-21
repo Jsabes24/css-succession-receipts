@@ -1,0 +1,90 @@
+{
+  "artifact": "authority-handoff-receipt",
+  "spec_version": "0.2",
+  "revision": 3,
+  "keys": {
+    "ahr-vector-1": "../../keys/vector.pub.pem"
+  },
+  "cases": [
+    {
+      "name": "binding-present-verifies-1of1",
+      "file": "golden-binding-1of1.json",
+      "expect": "pass",
+      "note": "single approver. Native artifacts contributed by the authorization-receipt format's author (I. Schrock, EMILIA Protocol) and independently reproduced. the artifact is a complete eight-member Trust Receipt carrying no caid and no @version; the digest is SHA-256 over the JCS bytes of the complete unchanged artifact, log_proof and approver_key_proofs included, and the identifier is derived only after verification under a relying-party-pinned mapping and never written back",
+      "authorization_receipt": "authorization-receipt-1of1.json",
+      "expect_without_native_verification": "not_verified"
+    },
+    {
+      "name": "binding-present-verifies-2of3",
+      "file": "golden-binding-2of3.json",
+      "expect": "pass",
+      "note": "basic threshold: the same detailed format carrying distinct signoffs that satisfy the relying party's pinned quorum policy. There is no separate threshold receipt format",
+      "authorization_receipt": "authorization-receipt-2of3.json",
+      "expect_without_native_verification": "not_verified"
+    },
+    {
+      "name": "binding-absent-does-not-invalidate",
+      "file": "binding-absent.json",
+      "expect": "pass",
+      "note": "an absent optional binding leaves the succession receipt valid, asserting no cross-format binding",
+      "authorization_receipt": "authorization-receipt-1of1.json"
+    },
+    {
+      "name": "binding-without-native-artifact",
+      "file": "golden-binding-1of1.json",
+      "expect": "not_verified",
+      "note": "the binding is carried and proof-covered but its artifact was not supplied, so the cross-check did not run. This is NOT a pass: reading it as binding_verified is the misreading r2's equivalent case invited"
+    },
+    {
+      "name": "binding-quorum-suite-named-as-format",
+      "file": "binding-quorum-suite-named-as-format.json",
+      "expect": "not_verified",
+      "note": "EP-QUORUM-v1 names the quorum reference conformance suite, not a receipt carrier, so no verification procedure is registered for it",
+      "authorization_receipt": "authorization-receipt-1of1.json"
+    },
+    {
+      "name": "binding-receipt-hash-mismatch",
+      "file": "binding-receipt-hash-mismatch.json",
+      "expect": "fail",
+      "failing_check": "authorization_binding",
+      "note": "the claimed receipt_hash does not match the recomputed complete-artifact digest",
+      "authorization_receipt": "authorization-receipt-1of1.json",
+      "expect_without_native_verification": "not_verified"
+    },
+    {
+      "name": "binding-caid-mismatch",
+      "file": "binding-caid-mismatch.json",
+      "expect": "fail",
+      "failing_check": "authorization_binding",
+      "note": "the claimed caid does not match the identifier derived from the verified artifact under the pinned mapping. Evaluated after the digest, never before",
+      "authorization_receipt": "authorization-receipt-1of1.json",
+      "expect_without_native_verification": "not_verified"
+    },
+    {
+      "name": "binding-log-proof-mutated",
+      "file": "golden-binding-1of1.json",
+      "expect": "fail",
+      "failing_check": "authorization_binding",
+      "note": "log_proof changed. The native log leaf digest excludes this member, so a verifier hashing the leaf rather than the complete artifact passes this case — which is why it is here",
+      "authorization_receipt": "authorization-receipt-log-proof-mutated.json",
+      "expect_without_native_verification": "not_verified"
+    },
+    {
+      "name": "binding-approver-proofs-mutated",
+      "file": "golden-binding-1of1.json",
+      "expect": "fail",
+      "failing_check": "authorization_binding",
+      "note": "approver_key_proofs changed. Excluded from the leaf digest for the same reason, and caught here for the same reason",
+      "authorization_receipt": "authorization-receipt-approver-proofs-mutated.json",
+      "expect_without_native_verification": "not_verified"
+    },
+    {
+      "name": "binding-native-caid-inserted",
+      "file": "golden-binding-1of1.json",
+      "expect": "fail",
+      "failing_check": "authorization_binding",
+      "note": "the derived identifier written back into the signed artifact. The schema is closed, so this is refused as an inserted composition value rather than ignored as an unknown member",
+      "authorization_receipt": "authorization-receipt-caid-inserted.json"
+    }
+  ]
+}

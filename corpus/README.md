@@ -40,9 +40,38 @@ expressed) — they are test constants, not secrets, and secure nothing.
 - `file` — the artifact document (`log` + `ledger` for anchoring cases, which pair a
   checkpoint chain with an export).
 - `eval_at` — for time-windowed artifacts (CAP), the RFC 3339 instant to evaluate at.
-- `expect` — `pass` or `fail`.
+- `expect` — `pass`, `fail`, or `not_verified`.
+  - `not_verified` is the third result of `draft-sabey-succession-receipts`
+    §6 step 3: the verifier **could not perform** the check. That is a fact
+    about the verifier, not about the evidence, and it is not a `fail`. A
+    relying party requiring a verified result must accept neither. Cases
+    expecting it exist because an unregistered format, an absent
+    relying-party pin, and a missing artifact all reach it — and because
+    reporting them as failures is a defect corpora should catch, not
+    reproduce.
+  - A case whose `expect` is `not_verified` asserts what the **cross-check**
+    reports, so a harness must actually run it — including when the case
+    names no artifact, which is the "carried but unchecked" state itself.
+    Skipping the call there and reporting the containing receipt's own
+    validity is precisely the conflation this value exists to separate.
+- `expect_without_native_verification` — the result for a verifier that does
+  **not** implement the named foreign format's own verification procedure
+  (§6 step 4). Present only on cases whose outcome depends on that
+  capability; absent means the expectation holds for any verifier.
+
+  It exists because §6 orders native verification *before* the digest and
+  identifier comparisons, so a verifier lacking that procedure stops at step 4
+  and reports `not_verified` — including for cases whose evidence is
+  demonstrably bad. Recording only the capable verifier's expectation would
+  make every other implementation look non-conforming; recording only the
+  incapable one's would leave the digest and identifier rules unpinned. Two
+  fields, because there are two honest answers and which applies is a fact
+  about the verifier, not about the vector. Use the one that matches what your
+  implementation actually does.
+
 - `failing_check` — where a failing case must be caught. Names per artifact:
-  - AHR: `proof`, `evidence_hash`, `evidence_signature`, `claim_grounding`
+  - AHR: `proof`, `evidence_hash`, `evidence_signature`, `claim_grounding`,
+    `authorization_binding`, `version_claims`
   - CLE: `structure`, `event_hash`, `linkage`, `event_signature`, `audit_chain`,
     `record_signature`, `proof`
   - CAP: `proof`, `window`, `basis`
