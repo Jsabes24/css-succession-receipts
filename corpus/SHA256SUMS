@@ -145,3 +145,9 @@ b140f0d5f7cce5da49a6d2271f50dcc5e3df504de492f6040318390434ad90d7  corpus/seat-ev
 00c6eb157ea37edb80ec8855a6dd3d4a2b0f2401a8a06e00980f75e3e42f1412  corpus/seat-evidence-v0.1/r1/tamper-corpus-not-published.json
 5d18a64002a2a06d9dd7e25e591e1fc06cc83795625a259a67a422e335283570  corpus/seat-evidence-v0.1/r1/tamper-proof.json
 2fe4c42dc18695ebf976dccfaa2e37bf5bec6c5a5ca9f43d07c374e666295565  corpus/seat-evidence-v0.1/r1/tamper-unsigned.json
+1d329b15abc844b565c6cb6ddbac1ce475f4a4f960bc2bcc46b018d1d8538f31  corpus/cap-v0.1/r2/capability-altered.json
+970454d2828087594ff292c7af0659c68edad6b9c13128fe52cdcb9e5ce65adb  corpus/cap-v0.1/r2/capability-extra-member.json
+ce34126a1e6772d1e13269cb4791717bb943f0a381ee8267dfefd0f57bb989aa  corpus/cap-v0.1/r2/deny-basis.json
+ea371fb5da219d458e32a01e46f7e7809dd83fa835ee165e2b5a5db97a3023c6  corpus/cap-v0.1/r2/golden.json
+11e9a62f3b56949b152757565e5576460c692fd8a5b72bdfa3833cb07048d783  corpus/cap-v0.1/r2/manifest.json
+6a4874171a0ad33ce542ad59034af03afc9629d6aea2ec1dc059f2ba2c0d3fa1  corpus/cap-v0.1/r2/proof-signature-bitflip.json
