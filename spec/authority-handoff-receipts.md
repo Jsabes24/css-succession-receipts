@@ -348,15 +348,20 @@ Offline verification: `sr-verify receipt -receipt <file> -public-keys key_id=pat
 - **Issuer-rooted.** A receipt proves what the issuing registry recorded, under the keys
   you trust for it. It does not prove the registry recorded everything — omission of an
   entire succession, or a receipt for a fork of history, is detectable only against the
-  ledger itself (a full [ledger export](./ledger-export.md) replays the complete hash
-  chain) or an external anchor ([external anchoring](./external-anchoring.md) defines
+  ledger itself (a full [ledger export](./ledger-export.md) replays the hash chain it
+  carries, and only a **signed** export attests that it is complete: an unsigned export
+  can be a cleanly truncated prefix that still verifies structurally, ledger-export §1)
+  or an external anchor ([external anchoring](./external-anchoring.md) defines
   periodic signed checkpoints of the head): a rollback by a
   storage-privileged insider after issuance is out of the receipt's detection scope,
   though any receipt already in a counterparty's hands becomes durable evidence against
   exactly that class of tampering. Deployments wanting stronger-than-issuer evidence
   SHOULD pin the event-signing key independently of the receipt-issuing key and/or
   witness the ledger head externally — then a compromised issuer key alone can no
-  longer fabricate internally consistent evidence.
+  longer fabricate internally consistent evidence. *(Clarification 2026-11-04: the text
+  said a full ledger export "replays the complete hash chain", which holds only for a
+  signed export; raised in the aeoess/agent-governance-vocabulary crosswalk review,
+  PR #240. No wire change.)*
 - **Evidence subset, not chain proof.** Evidence events verify individually (hash +
   signature) but are a cross-stream subset: a receipt does not prove stream contiguity
   or completeness of the surrounding ledger. Chain-position verification is the ledger's
