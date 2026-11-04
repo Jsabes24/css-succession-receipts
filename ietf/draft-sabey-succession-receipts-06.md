@@ -35,7 +35,12 @@ normative:
   I-D.schrock-canonical-action-identifier:
 
 informative:
+  RFC7942:
   RFC9162:
+  AGV-CROSSWALK:
+    title: "Agent Governance Vocabulary: Succession Receipts crosswalk"
+    target: https://github.com/aeoess/agent-governance-vocabulary/blob/main/crosswalk/succession-receipts.yaml
+    date: 2026
   SR-REPO:
     title: "Succession Receipts: specifications and conformance corpus"
     target: https://github.com/jsabes24/css-succession-receipts
@@ -512,6 +517,40 @@ receipt. The `authorization_binding` claim ({{authorization-binding}}) is
 introduced under exactly this rule — it is version-independent and changes
 no existing receipt's bytes.
 
+# Implementation Status {#implementation-status}
+
+This section records the status of known implementations of the protocol
+defined by this specification at the time of posting, as described in
+{{RFC7942}}. It is not intended to be included in a published RFC.
+
+- **Reference issuer.** Receipts are issued by the proprietary system of
+  record maintained by Continuity Laboratories, from which the format was
+  extracted. Every succession receipt in the conformance corpus
+  {{SR-CORPUS}} was produced by it.
+- **Reference verifier.** `sr-verify`, maintained by Continuity
+  Laboratories as a command-line tool and as an in-browser WebAssembly
+  build, implements every step of {{verification}} and meets every
+  expectation of the corpus manifests: each golden vector verifies, each
+  tamper case is rejected at its named check, and where a case needs the
+  native verification procedure of another format, which it deliberately
+  does not implement, it reports the binding as not verified.
+- **Cross-format authorization binding.** Iman Schrock (EMILIA Protocol),
+  author of the authorization-receipt format
+  {{I-D.schrock-ep-authorization-receipts}}, contributed the native Trust
+  Receipt artifacts and executable checks that pin the
+  `authorization_binding` verification of {{authorization-binding}}, for one
+  approver and for two of three. They are published, independently
+  reproduced, in corpus revisions `ahr-v0.2/r2` and `ahr-v0.2/r3`
+  {{SR-CORPUS}}, with the derivation of each `caid` value.
+- **Independent proof check.** For the agent-governance-vocabulary
+  crosswalk {{AGV-CROSSWALK}}, its maintainer wrote a verifier from the
+  text of {{canonical}} and step 1 of {{verification}} alone, without the
+  reference code. It recomputed the canonical bytes, the receipt hash and
+  the Ed25519 issuer signature of two golden vectors, and both passed; it
+  rejected three tamper cases (a signature bit-flip, altered content and a
+  stripped proof) as the corpus manifest expects. It did not recompute
+  evidence event hashes, claim grounding or the later verification steps.
+
 # Security Considerations
 
 **A receipt proves what the issuer recorded, not that the issuer is
@@ -615,12 +654,16 @@ that the illustrative receipt in {{document}} still carried the `format`
 value {{authorization-binding}} forbids dispatching on, which -05 corrects.
 A third-party crosswalk review of -05 for the agent-governance vocabulary
 identified that the canonical form had been described as coinciding with
-{{RFC8785}} for every receipt, which -06 corrects.
+{{RFC8785}} for every receipt, which -06 corrects. In the same review
+Tymofii Pidlisnyi wrote an independent check of the receipt proof from the
+text of this document alone ({{implementation-status}}).
 
 # Change Log
 {:numbered="false"}
 
--06: Stated the canonical form of {{canonical}} exactly — member names
+-06: Added an Implementation Status section ({{RFC7942}}), including an
+independent check of the receipt proof written from this document's text.
+Stated the canonical form of {{canonical}} exactly — member names
 sorted by UTF-8 bytes, and the string escapes the reference issuer
 produces — and replaced the statement that it coincides with the JSON
 Canonicalization Scheme {{RFC8785}} for the receipt's value domain. It
