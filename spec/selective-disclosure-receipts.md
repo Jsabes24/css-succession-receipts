@@ -160,9 +160,9 @@ The evidence set, its collection rules, and its canonical order are exactly the 
 
 **Canonical form.** The canonical bytes of an SDR are the UTF-8 JSON serialization of
 the document **with the `proof` and `disclosures` members absent**, under the AHR §3
-rules: object members sorted lexicographically by key, no insignificant whitespace,
-minimal string escaping. The value domain excludes floating-point numbers, so this
-coincides with RFC 8785 (JCS) output. The same rules canonicalize the `[salt, path,
+rules: object members sorted by the UTF-8 bytes of their names, no insignificant
+whitespace, the AHR §3 string escapes. It equals RFC 8785 (JCS) output only within the
+subset AHR §3 names. The same rules canonicalize the `[salt, path,
 value]` commitment input (§2.3).
 
 **Proof.** Identical to the AHR §3 proof — `receipt_hash = lowercase hex(SHA-256(
@@ -362,7 +362,7 @@ of disclosed ones; the verifier's ability to know what it is not seeing.
 **SD-JWT / SD-JWT-VC.** The mechanism is deliberately the same as IETF SD-JWT
 (salted per-claim digests inside the signed body; disclosures outside; projections by
 omission), so the design inherits its analysis. The encoding is not: CSS receipts are
-plain JSON canonicalized by the §3/JCS discipline with the platform's
+plain JSON canonicalized by the AHR §3 form with the platform's
 `CSSEd25519Signature` proof, where SD-JWT is JWS-based with base64url-encoded
 disclosure arrays. Deltas recorded honestly: no decoy digests (§7 row 6), no key
 binding (§7 row 10), fixed unit granularity (§2.4). If a conformant SD-JWT-VC profile

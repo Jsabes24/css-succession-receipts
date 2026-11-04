@@ -111,7 +111,17 @@ Integrity suite (§8 discusses interop honestly).
 | `commitments_carried` | array of UUID, optional | Every commitment inherited. Sorted lexicographically; omitted when none. |
 | `constitution` | object | **v0.2, required.** The constitutional lineage the handoff ran under: `genesis_event_hash` (the `GenesisInitialized` event hash — the lineage root every deployment has exactly one of), `amendments_ratified` (count of `AmendmentRatified` events in force at completion), and `amendment_head_hash` (event hash of the latest such amendment; omitted when the count is 0). All referenced events are carried in `evidence`, so the claim is recomputable from the receipt alone: a verifier proves not just *that* the transfer was governed but *by which* constitution. Absent on v0.1 receipts. |
 | `ledger_binding` | object | **v0.2, required.** The evidence horizon: `height` (1-based master-stream position of the receipt's final evidence event) and `event_hash` (that event's hash). Offline, the hash must match the final evidence event; against a [ledger export](./ledger-export.md) or an [anchored checkpoint](./external-anchoring.md), an auditor can additionally prove no correlated event at or below `height` was omitted — the completeness cross-check a bare evidence list cannot provide. Absent on v0.1 receipts. |
-| `authorization_binding` | object | **Optional** (additive 2026-07-20 — no `spec_version` bump, §9). The cross-format authorization binding: when the handoff itself was authorized pre-execution as a material action under an authorization-receipt format, this claim binds that exact authorization to this exact transfer. Members, all strings: `caid` — the canonical action identifier of the handoff, verbatim (byte-identical) as the named format defines it — a native member or a value derived from the verified receipt under the format's pinned mapping profile; `receipt_hash` — lowercase-hex SHA-256 over the canonical representation of the authorization receipt, as defined by its format; `format` — the authorization-receipt format identifier, naming the canonicalization to apply (`"EP-RECEIPT-v1"`; `"EP-QUORUM-v1"` for the multi-party case). Verified per §4 step 6 when present. When absent, the receipt verifies exactly as before this claim was defined and asserts no cross-format binding — neither format absorbs the other. |
+| `authorization_binding` | object | **Optional** (additive 2026-07-20 — no `spec_version` bump, §9). The cross-format authorization binding: when the handoff itself was authorized pre-execution as a material action under an authorization-receipt format, this claim binds that exact authorization to this exact transfer. Members, all strings: `caid` — the canonical action identifier obtained from the natively verified authorization artifact under a mapping profile the relying party pins independently (a native member where the format carries one; a derived identifier is a composition value, never added to the native artifact); `receipt_hash` — exactly 64 lowercase hex characters, SHA-256 of the **complete** native artifact under its format's canonicalization (for `EP-AUTHORIZATION-RECEIPT-v1`, the RFC 8785 canonicalization of the complete, unchanged Trust Receipt, `log_proof` and `approver_key_proofs` included); `format` — the identifier of the native artifact format and its verification procedure: `"EP-AUTHORIZATION-RECEIPT-v1"` for the Trust Receipt. `"EP-RECEIPT-v1"` names a different generic envelope and MUST NOT dispatch to that verifier; `"EP-QUORUM-v1"` names a quorum reference suite, not a receipt carrier, canonicalization or native verification procedure. Verified per §4 step 6 when present. When absent, the receipt verifies exactly as before this claim was defined and asserts no cross-format binding — neither format absorbs the other. |
+
+**Parties and identity.** A succession moves authority from one steward to another;
+an upgrade of one agent is a succession between the stewards of its two generations.
+Each `identity_id` is the identity bound at that steward's assignment. In the reference
+issuer every steward is assigned its own identity, linked to its predecessor's by an
+identity lineage that v0.2 does not carry. A receipt therefore makes no claim that its
+two parties are the same entity, and equal `identity_id` values, should an issuer
+produce them, assert nothing further: verifiers attach no meaning to equality.
+*(Clarification 2026-11-04, raised in the aeoess/agent-governance-vocabulary crosswalk
+review, PR #240. No wire change.)*
 
 ### 2.2 `evidence` — the grounding events
 
@@ -148,13 +158,36 @@ correspondence normatively.
 **Canonical form.** The canonical bytes of a receipt are the UTF-8 JSON serialization of
 the receipt **with the `proof` member absent**, with:
 
-- object members sorted lexicographically by key (byte order of the UTF-8 key),
+- object members sorted by the UTF-8 bytes of their names (equivalently, by Unicode
+  code point),
 - no insignificant whitespace,
-- minimal string escaping (no HTML escaping; non-ASCII characters literal UTF-8).
+- strings escaped exactly so: `"` and `\` as `\"` and `\\`; U+0008, U+0009, U+000A,
+  U+000C and U+000D as `\b`, `\t`, `\n`, `\f` and `\r`; every other character below
+  U+0020 as `\u00xx` (lowercase hex); U+2028 and U+2029 as `\u2028` and `\u2029`;
+  every other character as literal UTF-8, with no HTML escaping,
+- integers in their shortest decimal form; the value domain is strings, booleans,
+  integers, arrays and objects — no floating-point numbers.
 
-The receipt value domain is strings, booleans, integers, arrays, and objects — no
-floating-point numbers — so this coincides with RFC 8785 (JCS) output for every receipt
-this spec can produce. Implementations MAY use a JCS library.
+This is the output of Go's `encoding/json` (Go 1.22 and later) with HTML escaping
+disabled, which the reference issuer uses.
+
+**Relation to RFC 8785 (JCS).** For a document whose member names are all ASCII, whose
+strings contain neither U+2028 nor U+2029, and whose integers lie within ±(2^53−1), the
+canonical bytes are identical to RFC 8785 output, and a JCS library MAY be used on such
+documents. Outside that subset the two differ — JCS orders member names by UTF-16 code
+units, which can disagree with code-point order once a name contains a character at or
+above U+E000, and JCS writes U+2028 and U+2029 literally — and this section, not
+RFC 8785, is the rule. Issuers SHOULD keep member names ASCII. Every AHR vector in the
+conformance corpus lies inside the subset.
+
+*Correction (2026-11-04).* The text at 17ec7bc said this form coincides with RFC 8785
+for every receipt this spec can produce. It does not outside the subset above: §9 keeps
+unknown members inside the signed form, so a member name outside ASCII can occur, and a
+string value can carry U+2028. The rule itself did not change — it is the reference
+issuer's output — and the escapes above were measured against it. The reference
+verifier had written U+0008 and U+000C as `\u0008` and `\u000c` (Go's encoding before
+1.22) and was corrected to match. Raised in the aeoess/agent-governance-vocabulary
+crosswalk review, PR #240.
 
 **Receipt hash.** `receipt_hash = lowercase hex( SHA-256( canonical bytes ) )`.
 
@@ -192,7 +225,9 @@ A verifier MUST perform all six steps; any failure invalidates the receipt.
    ```
 
    UUIDs as lowercase hyphenated strings; `payload_json` is the payload's compact JSON
-   serialization **in the stored field order** (the reference implementation restores
+   serialization **in the stored field order**, with strings escaped as in §3 except that
+   `<`, `>` and `&` are written `\u003c`, `\u003e` and `\u0026` (Go's `json.Marshal`
+   default) (the reference implementation restores
    each payload's concrete type from the event-type registry before re-serializing —
    generic re-serialization with re-ordered keys will not reproduce the hash).
    `correlation_id`, `causation_id`, `actor_id`, and `signature` are excluded from the
@@ -254,19 +289,38 @@ A verifier MUST perform all six steps; any failure invalidates the receipt.
    `credentialSubject.authorization_binding` is absent, this step passes — the receipt
    asserts no cross-format binding. If present, reject unless the claim is well-formed:
    an object whose `caid` is a non-empty string, whose `receipt_hash` is exactly 64
-   lowercase hex characters (SHA-256 — the platform-wide convention), and whose
-   `format` is a non-empty authorization-format identifier; unknown additional members
-   are ignored (§9). A verifier that also holds the authorization receipt MUST
-   additionally recompute that receipt's canonical hash as its `format` defines and
-   reject unless the recomputed hash equals `receipt_hash` and the authorization
-   receipt's canonical action identifier — a native member or a derived value, as the
-   named format defines — equals `caid`, byte-identical. The recomputed hash is
-   evaluated before the identifier comparison; the conformance corpus pins this order
-   with cross-format vectors contributed by the authorization-format author
-   ([`corpus/ahr-v0.2/r2/`](../corpus/ahr-v0.2/r2/manifest.json)). A verifier
-   without the authorization receipt performs the well-formedness check only: the
-   binding is then carried, proof-covered, for a consumer that can complete the
-   cross-check.
+   lowercase hex characters, and whose `format` is a non-empty identifier; unknown
+   additional members of the claim are ignored (§9), which does not permit inserting
+   members into a native artifact whose schema is closed. A verifier that implements the
+   cross-check then, in order:
+   1. if the native artifact, its supported format definition, or the inputs its native
+      verification needs are unavailable, reports the binding **not verified** — neither
+      a pass nor a demonstrated mismatch; a relying party requiring a verified binding
+      MUST NOT accept it as satisfied;
+   2. verifies the unchanged artifact under its native procedure with independently
+      selected trust inputs (for `EP-AUTHORIZATION-RECEIPT-v1`,
+      draft-schrock-ep-authorization-receipts §7.3) — an artifact that fails cannot
+      establish the binding, and the succession issuer's signature is no substitute;
+   3. recomputes the digest of the complete artifact and rejects unless it equals
+      `receipt_hash`;
+   4. obtains the artifact's action identifier as its format defines — for the EMILIA
+      Protocol formats, by projecting the verified Action Object under the exact
+      relying-party-pinned mapping of draft-schrock-canonical-action-identifier, never
+      adding it to the native artifact — and rejects unless it equals `caid`,
+      byte-identical. A missing, failed, lossy or unpinned mapping is indeterminate, not
+      a match.
+
+   The digest comparison precedes the identifier comparison. Native-verification
+   failure, incomplete verification and demonstrated mismatch are three distinct
+   results. Corpus revision [`ahr-v0.2/r2`](../corpus/ahr-v0.2/r2/manifest.json) pinned
+   the earlier composition contract and stays unchanged as historical evidence of it;
+   [`ahr-v0.2/r3`](../corpus/ahr-v0.2/r3/manifest.json) carries the native vectors.
+
+   *Correction (2026-11-04).* This step and the §2.1 `format` values now read as
+   draft-sabey-succession-receipts-04 and -05 already did; the text at 17ec7bc still
+   described the -02 contract (derive, embed, then hash; `EP-RECEIPT-v1`). The reference
+   verifier and corpus r3 already followed the corrected order. Raised in the
+   aeoess/agent-governance-vocabulary crosswalk review, PR #240.
 
 The tamper matrix exercises each step's failure mode. The re-signed cases model a lying
 issuer who alters content and re-signs the receipt: steps 2–4 catch every alteration
@@ -342,8 +396,8 @@ VCs) can carry receipts unmodified. It is **not** a conformant VC: the proof sui
 CSS discipline of §3 rather than a registered Data Integrity cryptosuite, `issuer.id` and
 `credentialSubject.id` are URNs rather than resolvable DIDs, and no JSON-LD context
 resolution is defined. If a conformant profile is wanted later, the migration path is an
-`eddsa-jcs-2022` proof alongside the CSS proof — the canonical form in §3 was chosen to
-be JCS-compatible precisely to keep that door open (additive, §9).
+`eddsa-jcs-2022` proof alongside the CSS proof (additive, §9). That proof would
+canonicalize under RFC 8785 itself, which equals the §3 form within the subset §3 names.
 
 **in-toto / SLSA.** A receipt is conceptually an attestation in the in-toto sense —
 signed evidence that a step (the handoff) was performed by authorized parties under a

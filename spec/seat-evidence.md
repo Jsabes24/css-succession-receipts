@@ -125,8 +125,9 @@ Rules a conforming implementation enforces:
 - `stance.abstained` and `stance.distribution` are **mutually exclusive**; a non-abstaining
   stance carries a distribution summing to 1.
 - Probabilities and rates are **decimal strings in `[0,1]`** — no exponents, no signs. The
-  value domain is deliberately float-free, so the canonical form coincides with RFC 8785
-  (JCS) and the document survives a JavaScript verifier unchanged.
+  value domain is deliberately float-free, so the document survives a JavaScript verifier
+  unchanged; the canonical form is AHR §3's, which equals RFC 8785 (JCS) only within the
+  subset AHR §3 names.
 - Digests are lowercase hex SHA-256.
 - `calibration.corpus.tree` names a **published** corpus revision path (for example
   `cle-v0.1/r1`), not an opaque internal identifier.

@@ -50,8 +50,8 @@ the same `ed25519:<key_id>:<base64url>` signature form as every other format in 
 ## 2. Wire format
 
 One atom is a JSON object. Canonicalization sorts keys, so the wire bytes — and therefore the
-signed hash — are independent of field order. This is the same JCS discipline as the ledger
-export, the handoff receipt and the anchor checkpoint.
+signed hash — are independent of field order. This is the AHR §3 canonical form, as for the
+ledger export, the handoff receipt and the anchor checkpoint.
 
 | Field | Meaning |
 |---|---|

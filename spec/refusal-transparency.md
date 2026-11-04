@@ -163,8 +163,9 @@ digests themselves.
 
 The canonical form is the digest document with the `proof` member absent,
 serialized as UTF-8 JSON with lexicographically sorted keys, no insignificant
-whitespace, and no HTML escaping — for this value domain (strings, integers,
-arrays, objects; no floats) this coincides with RFC 8785 (JCS). The proof:
+whitespace, and no HTML escaping — the AHR §3 canonical form, string escapes and
+key order included; it equals RFC 8785 (JCS) output only within the subset AHR §3
+names. The proof:
 
 ```json
 "proof": {

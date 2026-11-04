@@ -131,8 +131,8 @@ single credential proof covers the whole document, decision included.
 
 Identical discipline to receipts (#31) and anchors (#8): the canonical form is UTF-8 JSON with
 lexicographically sorted keys, no insignificant whitespace, no HTML escaping, and the `proof` member
-absent (for this value domain — strings, bools, arrays, objects, no floats — this coincides with
-RFC 8785/JCS). The proof signs the hex SHA-256 of the canonical bytes. `created` is outside the
+absent — the AHR §3 canonical form, string escapes and key order included (it equals RFC 8785/JCS
+output only within the subset AHR §3 names). The proof signs the hex SHA-256 of the canonical bytes. `created` is outside the
 signed content, so re-signing the same decision/credential at a different time yields the same hash.
 
 ---

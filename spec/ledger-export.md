@@ -101,9 +101,9 @@ verifies (as unsigned).
 ## 3. Canonicalization and proof
 
 The canonical form of an export is UTF-8 JSON with **lexicographically sorted keys, no
-insignificant whitespace, no HTML escaping, and the `proof` member absent**. For the
-export's value domain (strings, integers, arrays, objects — no floats) this coincides
-with RFC 8785 (JCS) output.
+insignificant whitespace, no HTML escaping, and the `proof` member absent** — the AHR §3
+canonical form, string escapes and key order included. It equals RFC 8785 (JCS) output
+only within the subset AHR §3 names.
 
 The proof is the platform's discipline — hash-then-sign, no new key management:
 

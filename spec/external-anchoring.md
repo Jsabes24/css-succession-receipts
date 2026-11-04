@@ -75,8 +75,8 @@ publish checkpoints to an independent witness (§6).
 ## 2. Checkpoint wire format
 
 One checkpoint is a JSON object. Canonicalization sorts keys, so the wire bytes (and thus
-the signed hash) are independent of field order — the same JCS discipline as the ledger
-export.
+the signed hash) are independent of field order — the AHR §3 canonical form, as for the
+ledger export.
 
 | Field | Meaning |
 |---|---|
