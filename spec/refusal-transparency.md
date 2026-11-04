@@ -103,9 +103,10 @@ A digest is one JSON document:
 | `forbidden_event_types[]` | array | event types the attack would have appended had it succeeded; at least one |
 | `events[]` | array | the complete event ledger of the probe's isolated attempt |
 
-Each probe runs on an **isolated, freshly constructed system instance**, so its
-`events` list is the complete ledger of that attempt and probes cannot
-contaminate one another. Events are the platform's standard envelopes — the
+Each probe runs on an **isolated, freshly constructed system instance**, so probes
+cannot contaminate one another, and the issuer attests that its `events` list is
+the complete ledger of that attempt. That completeness is the issuer's statement,
+not something verification establishes (§5). Events are the platform's standard envelopes — the
 same shape ledger exports carry — with `event_hash` per the platform
 event-hash rule (SHA-256 over the envelope's identifying fields plus the
 payload bytes re-serialized in document key order; see the ledger-export
@@ -226,6 +227,19 @@ should treat it as a failure with the digest itself as the evidence.
   Cadenced publication (so gaps are visible), anchoring (so timing is
   provable), and third-party countersigned runs (a future version) each
   tighten that.
+- **Absence is checked over the supplied ledger only.** Verification shows the
+  refused transition is absent from the events the digest carries, and that those
+  events are tamper-evident against everyone but the signer. It does not show the
+  list is complete: an issuer that drops a probe's final events and re-signs
+  produces a digest that verifies. Seed derivation shows the ledger was produced
+  for this run, not that nothing was left out, and the scope is the probe's
+  isolated instance, not any other system. Absence from the supplied ledger does
+  not, by itself, establish that the transition never occurred; completeness
+  needs a commitment to the instance's ledger head made outside the digest
+  (external anchoring, or an independent party running or countersigning the
+  probe). *(Clarification 2026-11-04, from a cross-format compatibility
+  experiment pairing a digest with an Agent Action Capsule over one blocked
+  attempt. No wire change.)*
 - **Key custody.** A digest is exactly as trustworthy as the binding between
   the issuer and the verification keys the consumer supplies. Keys travel out
   of band (the keyset specification applies).

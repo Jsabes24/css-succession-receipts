@@ -226,9 +226,10 @@ conforming verifier accepts either version, each under its own rules
 ({{verification}}).
 
 Timestamps throughout are {{RFC3339}} UTC instants. Each probe runs on
-an isolated, freshly constructed instance of the governed system, so its
-`events` member is the *complete* ledger of that attempt and probes
-cannot contaminate one another. Event envelopes carry
+an isolated, freshly constructed instance of the governed system, so
+probes cannot contaminate one another, and the issuer attests that its
+`events` member is the *complete* ledger of that attempt. That
+completeness is the issuer's statement; see {{security}}. Event envelopes carry
 the same members, integrity rules, and optional signatures as succession
 receipt evidence ({{SR-ID}}; the event-hash rule is identical) and are
 embedded exactly as recorded.
@@ -406,6 +407,20 @@ deployed-artifact digest or build attestation carried in the run
 metadata, with the independent challenger or witness of the
 countersignature evolution above checking them.
 
+**Absence is checked over the supplied ledger only.** Verification
+establishes that a refused transition is absent from the `events` the
+digest carries, and that those events are tamper-evident against
+everyone but the signer. It does not establish that the list is
+complete: an issuer that drops a probe's final events and re-signs
+produces a digest that verifies. Seed derivation shows that a ledger was
+produced for this run, not that nothing was left out of it, and the
+scope of the claim is the probe's isolated instance, not any other
+system. Absence from the supplied ledger therefore does not, by itself,
+establish that the transition never occurred. Completeness requires a
+commitment to the instance's ledger head made outside the digest — an
+externally anchored ledger head, or an independent party running or
+countersigning the probe.
+
 **Seed grinding is neutralized by construction.** Nothing seed-derived
 affects what is attacked or what must be refused, so an issuer gains
 nothing by choosing seeds adversarially; the seed exists to bind the
@@ -454,7 +469,14 @@ family; this revision incorporates it.
 # Change Log
 {:numbered="false"}
 
--03: Replaced the statement that the canonical form coincides with the
+-03: Stated that a probe's `events` being its complete ledger is the
+issuer's attestation, and added the security consideration that absence
+is checked over the supplied ledger only and does not by itself establish
+that a transition never occurred. Raised in a cross-format compatibility
+experiment pairing a refusal digest with an Agent Action Capsule over one
+blocked attempt.
+
+Replaced the statement that the canonical form coincides with the
 JSON Canonicalization Scheme {{RFC8785}} for the format's value domain
 with a reference to the exact canonical form of {{SR-ID}} and the subset
 within which the two coincide, following the same correction there. No
